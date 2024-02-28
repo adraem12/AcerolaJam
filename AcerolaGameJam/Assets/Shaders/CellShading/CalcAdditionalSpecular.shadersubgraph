@@ -2226,7 +2226,7 @@
 }
 
 {
-    "m_SGVersion": 0,
+    "m_SGVersion": 1,
     "m_Type": "UnityEditor.ShaderGraph.ViewDirectionNode",
     "m_ObjectId": "1ec8dd1d30bc471e88852867894dee0b",
     "m_Group": {
