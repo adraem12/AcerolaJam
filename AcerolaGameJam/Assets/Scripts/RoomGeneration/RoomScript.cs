@@ -4,15 +4,29 @@ using UnityEngine;
 
 public class RoomScript : MonoBehaviour
 {
-    // Start is called before the first frame update
+    public int width;
+    public int length;
+    public int x;
+    public int z;
+
     void Start()
     {
-        
+        if (RoomController.instance == null)
+        {
+            Debug.Log("You pressed play in the wrong scene");
+            return;
+        }
+        RoomController.instance.RegisterRoom(this);
     }
 
-    // Update is called once per frame
-    void Update()
+    public Vector3 GetRoomCenter()
     {
-        
+        return new Vector3 (x * width, z * length);
+    }
+
+    private void OnDrawGizmos()
+    {
+        Gizmos.color = Color.red;
+        Gizmos.DrawWireCube(transform.position, new Vector3(width, 0, length));
     }
 }
