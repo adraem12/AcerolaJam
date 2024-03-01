@@ -2,8 +2,6 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
-using UnityEngine.SceneManagement;
-using static UnityEditor.Recorder.OutputPath;
 
 public class RoomInfo
 {
@@ -15,14 +13,16 @@ public class RoomInfo
 public class RoomController : MonoBehaviour
 {
     public static RoomController instance;
-    string currentWorldName = "Test";
     RoomInfo currentLoadRoomData;
     RoomScript currentRoom;
     Queue<RoomInfo> loadRoomQueue = new();
-    public List<RoomScript> loadedRooms = new();
+    List<RoomScript> loadedRooms = new();
     bool isLoadingRoom = false;
     bool spawnedBossRoom = false;
     bool updatedRooms = false;
+    public List<GameObject> startRoomPrefabs;
+    public List<GameObject> emptyRoomPrefabs;
+    public List<GameObject> endRoomPrefabs;
 
     private void Awake()
     {
@@ -52,7 +52,14 @@ public class RoomController : MonoBehaviour
         }
         currentLoadRoomData = loadRoomQueue.Dequeue();
         isLoadingRoom = true;
-        StartCoroutine(LoadRoomRutine(currentLoadRoomData));
+        GameObject newRoom = null;
+        if (currentLoadRoomData.name == "Start")
+            newRoom = startRoomPrefabs[Random.Range(0, startRoomPrefabs.Count - 1)];
+        else if (currentLoadRoomData.name == "Empty")
+            newRoom = emptyRoomPrefabs[Random.Range(0, emptyRoomPrefabs.Count - 1)];
+        else if (currentLoadRoomData.name == "End")
+            newRoom = endRoomPrefabs[Random.Range(0, endRoomPrefabs.Count - 1)];
+        Instantiate(newRoom);
     }
 
     IEnumerator SpawnBossRoom()
@@ -82,14 +89,6 @@ public class RoomController : MonoBehaviour
         loadRoomQueue.Enqueue(newRoomData);
     }
 
-    IEnumerator LoadRoomRutine(RoomInfo info)
-    {
-        string roomName = currentWorldName + info.name;
-        AsyncOperation loadRoom = SceneManager.LoadSceneAsync(roomName, LoadSceneMode.Additive);
-        while (loadRoom.isDone == false)
-            yield return null;
-    }
-
     public void RegisterRoom(RoomScript room)
     {
         if(!DoesRoomExist(currentLoadRoomData.x, currentLoadRoomData.z))
@@ -97,7 +96,7 @@ public class RoomController : MonoBehaviour
             room.transform.position = new Vector3(currentLoadRoomData.x * room.width, 0, currentLoadRoomData.z * room.length);
             room.x = currentLoadRoomData.x;
             room.z = currentLoadRoomData.z;
-            room.name += "-" + currentLoadRoomData.name + " " + room.x + ", " + room.z;
+            room.name += "_" + room.x + "-" + room.z;
             room.transform.parent = transform;
             isLoadingRoom = false;
             if (loadedRooms.Count == 0)

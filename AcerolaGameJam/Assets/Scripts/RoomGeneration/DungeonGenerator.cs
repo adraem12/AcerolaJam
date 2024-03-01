@@ -1,6 +1,5 @@
 using System.Collections.Generic;
 using UnityEngine;
-using static UnityEditor.Recorder.OutputPath;
 
 public class DungeonGenerator : MonoBehaviour
 {
