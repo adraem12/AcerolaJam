@@ -22,7 +22,80 @@ public partial class @Controls: IInputActionCollection2, IDisposable
     {
         asset = InputActionAsset.FromJson(@"{
     ""name"": ""Controls"",
-    ""maps"": [],
+    ""maps"": [
+        {
+            ""name"": ""PlayMap"",
+            ""id"": ""d587891b-19a3-4104-b097-41c505d01b18"",
+            ""actions"": [
+                {
+                    ""name"": ""Movement"",
+                    ""type"": ""Value"",
+                    ""id"": ""0d068256-a520-4bba-acf8-57f0326b93ee"",
+                    ""expectedControlType"": ""Vector2"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": true
+                }
+            ],
+            ""bindings"": [
+                {
+                    ""name"": ""2D Vector"",
+                    ""id"": ""14de8061-0d0d-42ef-8a91-7b7d54000932"",
+                    ""path"": ""2DVector"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Movement"",
+                    ""isComposite"": true,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": ""up"",
+                    ""id"": ""13efddbd-e6cf-4db7-a7e3-185a329fcc31"",
+                    ""path"": ""<Keyboard>/w"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Movement"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": true
+                },
+                {
+                    ""name"": ""down"",
+                    ""id"": ""5692f674-9568-47ec-b966-484beb2a1331"",
+                    ""path"": ""<Keyboard>/s"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Movement"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": true
+                },
+                {
+                    ""name"": ""left"",
+                    ""id"": ""6c03df51-5514-45a7-becd-df52431fa145"",
+                    ""path"": ""<Keyboard>/a"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Movement"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": true
+                },
+                {
+                    ""name"": ""right"",
+                    ""id"": ""503b9493-17b7-4dd7-b129-bc58617c2b33"",
+                    ""path"": ""<Keyboard>/d"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Movement"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": true
+                }
+            ]
+        }
+    ],
     ""controlSchemes"": [
         {
             ""name"": ""Keyboard"",
@@ -31,6 +104,9 @@ public partial class @Controls: IInputActionCollection2, IDisposable
         }
     ]
 }");
+        // PlayMap
+        m_PlayMap = asset.FindActionMap("PlayMap", throwIfNotFound: true);
+        m_PlayMap_Movement = m_PlayMap.FindAction("Movement", throwIfNotFound: true);
     }
 
     public void Dispose()
@@ -88,6 +164,52 @@ public partial class @Controls: IInputActionCollection2, IDisposable
     {
         return asset.FindBinding(bindingMask, out action);
     }
+
+    // PlayMap
+    private readonly InputActionMap m_PlayMap;
+    private List<IPlayMapActions> m_PlayMapActionsCallbackInterfaces = new List<IPlayMapActions>();
+    private readonly InputAction m_PlayMap_Movement;
+    public struct PlayMapActions
+    {
+        private @Controls m_Wrapper;
+        public PlayMapActions(@Controls wrapper) { m_Wrapper = wrapper; }
+        public InputAction @Movement => m_Wrapper.m_PlayMap_Movement;
+        public InputActionMap Get() { return m_Wrapper.m_PlayMap; }
+        public void Enable() { Get().Enable(); }
+        public void Disable() { Get().Disable(); }
+        public bool enabled => Get().enabled;
+        public static implicit operator InputActionMap(PlayMapActions set) { return set.Get(); }
+        public void AddCallbacks(IPlayMapActions instance)
+        {
+            if (instance == null || m_Wrapper.m_PlayMapActionsCallbackInterfaces.Contains(instance)) return;
+            m_Wrapper.m_PlayMapActionsCallbackInterfaces.Add(instance);
+            @Movement.started += instance.OnMovement;
+            @Movement.performed += instance.OnMovement;
+            @Movement.canceled += instance.OnMovement;
+        }
+
+        private void UnregisterCallbacks(IPlayMapActions instance)
+        {
+            @Movement.started -= instance.OnMovement;
+            @Movement.performed -= instance.OnMovement;
+            @Movement.canceled -= instance.OnMovement;
+        }
+
+        public void RemoveCallbacks(IPlayMapActions instance)
+        {
+            if (m_Wrapper.m_PlayMapActionsCallbackInterfaces.Remove(instance))
+                UnregisterCallbacks(instance);
+        }
+
+        public void SetCallbacks(IPlayMapActions instance)
+        {
+            foreach (var item in m_Wrapper.m_PlayMapActionsCallbackInterfaces)
+                UnregisterCallbacks(item);
+            m_Wrapper.m_PlayMapActionsCallbackInterfaces.Clear();
+            AddCallbacks(instance);
+        }
+    }
+    public PlayMapActions @PlayMap => new PlayMapActions(this);
     private int m_KeyboardSchemeIndex = -1;
     public InputControlScheme KeyboardScheme
     {
@@ -96,5 +218,9 @@ public partial class @Controls: IInputActionCollection2, IDisposable
             if (m_KeyboardSchemeIndex == -1) m_KeyboardSchemeIndex = asset.FindControlSchemeIndex("Keyboard");
             return asset.controlSchemes[m_KeyboardSchemeIndex];
         }
+    }
+    public interface IPlayMapActions
+    {
+        void OnMovement(InputAction.CallbackContext context);
     }
 }

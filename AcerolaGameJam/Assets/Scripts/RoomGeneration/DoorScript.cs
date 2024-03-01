@@ -4,15 +4,11 @@ using UnityEngine;
 
 public class DoorScript : MonoBehaviour
 {
-    // Start is called before the first frame update
-    void Start()
+    public enum DoorType
     {
-        
+        top, right, down, left
     }
-
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
+    public DoorType type;
+    public GameObject doorObject;
+    public GameObject[] wallObjects;
 }

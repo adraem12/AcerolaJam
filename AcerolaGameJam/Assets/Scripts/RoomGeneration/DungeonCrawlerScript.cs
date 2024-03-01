@@ -1,18 +1,19 @@
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class DungeonCrawlerScript : MonoBehaviour
+public class DungeonCrawlerScript
 {
-    // Start is called before the first frame update
-    void Start()
+    public Vector2Int Position {  get; set; }
+
+    public DungeonCrawlerScript(Vector2Int startPosition)
     {
-        
+        Position = startPosition;
     }
 
-    // Update is called once per frame
-    void Update()
+    public Vector2Int Move(Dictionary<Direction, Vector2Int> directionMovementMap)
     {
-        
+        Direction toMove = (Direction)Random.Range(0, directionMovementMap.Count);
+        Position += directionMovementMap[toMove];
+        return Position;
     }
 }
