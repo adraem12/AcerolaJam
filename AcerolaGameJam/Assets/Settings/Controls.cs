@@ -35,6 +35,15 @@ public partial class @Controls: IInputActionCollection2, IDisposable
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": true
+                },
+                {
+                    ""name"": ""Look"",
+                    ""type"": ""Value"",
+                    ""id"": ""53117c3f-cc29-415b-9af5-8349576714fb"",
+                    ""expectedControlType"": ""Vector2"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": true
                 }
             ],
             ""bindings"": [
@@ -92,6 +101,61 @@ public partial class @Controls: IInputActionCollection2, IDisposable
                     ""action"": ""Movement"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": true
+                },
+                {
+                    ""name"": ""2D Vector"",
+                    ""id"": ""192f41cf-5874-4e04-984a-b128f84fe273"",
+                    ""path"": ""2DVector"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Look"",
+                    ""isComposite"": true,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": ""up"",
+                    ""id"": ""91c04a80-4420-45be-b45b-08eae02823ef"",
+                    ""path"": ""<Keyboard>/upArrow"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Look"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": true
+                },
+                {
+                    ""name"": ""down"",
+                    ""id"": ""61312e08-889c-4ac1-89e7-454e57676e2b"",
+                    ""path"": ""<Keyboard>/downArrow"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Look"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": true
+                },
+                {
+                    ""name"": ""left"",
+                    ""id"": ""23dc7487-6e2e-49cf-adf0-fd10adc83c5c"",
+                    ""path"": ""<Keyboard>/leftArrow"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Look"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": true
+                },
+                {
+                    ""name"": ""right"",
+                    ""id"": ""79281256-4d1e-480e-82e0-747dcebf6c41"",
+                    ""path"": ""<Keyboard>/rightArrow"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Look"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": true
                 }
             ]
         }
@@ -107,6 +171,7 @@ public partial class @Controls: IInputActionCollection2, IDisposable
         // PlayMap
         m_PlayMap = asset.FindActionMap("PlayMap", throwIfNotFound: true);
         m_PlayMap_Movement = m_PlayMap.FindAction("Movement", throwIfNotFound: true);
+        m_PlayMap_Look = m_PlayMap.FindAction("Look", throwIfNotFound: true);
     }
 
     public void Dispose()
@@ -169,11 +234,13 @@ public partial class @Controls: IInputActionCollection2, IDisposable
     private readonly InputActionMap m_PlayMap;
     private List<IPlayMapActions> m_PlayMapActionsCallbackInterfaces = new List<IPlayMapActions>();
     private readonly InputAction m_PlayMap_Movement;
+    private readonly InputAction m_PlayMap_Look;
     public struct PlayMapActions
     {
         private @Controls m_Wrapper;
         public PlayMapActions(@Controls wrapper) { m_Wrapper = wrapper; }
         public InputAction @Movement => m_Wrapper.m_PlayMap_Movement;
+        public InputAction @Look => m_Wrapper.m_PlayMap_Look;
         public InputActionMap Get() { return m_Wrapper.m_PlayMap; }
         public void Enable() { Get().Enable(); }
         public void Disable() { Get().Disable(); }
@@ -186,6 +253,9 @@ public partial class @Controls: IInputActionCollection2, IDisposable
             @Movement.started += instance.OnMovement;
             @Movement.performed += instance.OnMovement;
             @Movement.canceled += instance.OnMovement;
+            @Look.started += instance.OnLook;
+            @Look.performed += instance.OnLook;
+            @Look.canceled += instance.OnLook;
         }
 
         private void UnregisterCallbacks(IPlayMapActions instance)
@@ -193,6 +263,9 @@ public partial class @Controls: IInputActionCollection2, IDisposable
             @Movement.started -= instance.OnMovement;
             @Movement.performed -= instance.OnMovement;
             @Movement.canceled -= instance.OnMovement;
+            @Look.started -= instance.OnLook;
+            @Look.performed -= instance.OnLook;
+            @Look.canceled -= instance.OnLook;
         }
 
         public void RemoveCallbacks(IPlayMapActions instance)
@@ -222,5 +295,6 @@ public partial class @Controls: IInputActionCollection2, IDisposable
     public interface IPlayMapActions
     {
         void OnMovement(InputAction.CallbackContext context);
+        void OnLook(InputAction.CallbackContext context);
     }
 }

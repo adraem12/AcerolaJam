@@ -3,27 +3,40 @@ using UnityEngine.InputSystem;
 
 public class PlayerController : MonoBehaviour
 {
-    public float speed;
+    public float movementSpeed;
+    public float lookSpeed;
     Rigidbody rb;
-    Vector3 inputDirection;
+    Vector3 moveDirection;
+    Vector3 lookDirection;
 
-    // Start is called before the first frame update
     void Start()
     {
         rb = GetComponent<Rigidbody>();
-        GameManager.instance.controls.PlayMap.Movement.performed += ReadInput;
-        GameManager.instance.controls.PlayMap.Movement.canceled += ReadInput;
+        GameManager.instance.controls.PlayMap.Movement.performed += ReadMovementInput;
+        GameManager.instance.controls.PlayMap.Movement.canceled += ReadMovementInput;
+        GameManager.instance.controls.PlayMap.Look.performed += ReadLookInput;
     }
 
-    void ReadInput(InputAction.CallbackContext context)
+    void ReadMovementInput(InputAction.CallbackContext context)
     {
-        var input = context.ReadValue<Vector2>();
-        inputDirection.x = input.x;
-        inputDirection.z = input.y;
+        var moveInput = context.ReadValue<Vector2>();
+        moveDirection.x = moveInput.x;
+        moveDirection.z = moveInput.y;
+    }
+
+    void ReadLookInput(InputAction.CallbackContext context)
+    {
+        var lookInput = context.ReadValue<Vector2>();
+        lookDirection.x = lookInput.x;
+        lookDirection.z = lookInput.y;
     }
 
     private void Update()
     {
-        rb.velocity = new Vector3(inputDirection.x * speed, 0, inputDirection.z * speed);
+        rb.velocity = new Vector3(moveDirection.x * movementSpeed, 0, moveDirection.z * movementSpeed);
+        Quaternion rot = Quaternion.Slerp(transform.rotation, Quaternion.LookRotation(lookDirection), Time.deltaTime * lookSpeed);
+        rot.x = 0;
+        rot.z = 0;
+        rb.rotation = rot;
     }
 }
