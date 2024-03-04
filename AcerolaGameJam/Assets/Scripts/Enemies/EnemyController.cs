@@ -1,23 +1,35 @@
 using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public enum EnemyState
 {
     Wander,
     Follow,
+    Attack,
     Die
+}
+
+public enum EnemyType
+{
+    Contact,
+    Melee,
+    Ranged
 }
 
 public class EnemyController : MonoBehaviour
 {
-    PlayerController player;
-    public EnemyState currentState = EnemyState.Wander;
-    public float range;
+    [HideInInspector] public PlayerController player;
+    EnemyState currentState = EnemyState.Wander;
+    public EnemyType enemyType;
+    public float health;
+    public float followRange;
+    public float attackRange;
     public float speed;
+    public float attackCoolDown;
     bool chooseDir = false;
-    bool dead = false;
+    [HideInInspector] public bool coolingDown = false;
     Vector3 randomDir;
+    public GameObject bulletPrefab;
 
     void Start()
     {
@@ -34,6 +46,9 @@ public class EnemyController : MonoBehaviour
             case EnemyState.Follow:
                 Follow();
                 break;
+            case EnemyState.Attack:
+                Attack();
+                break;
             case EnemyState.Die:
                 Die();
                 break;
@@ -42,11 +57,15 @@ public class EnemyController : MonoBehaviour
             currentState = EnemyState.Follow;
         else if (!IsPlayerInRange() && currentState != EnemyState.Die)
             currentState = EnemyState.Wander;
+        if (Vector3.Distance(transform.position, player.transform.position) <= attackRange)
+            currentState = EnemyState.Attack;
+        if (health <= 0)
+            currentState = EnemyState.Die;
     }
 
     bool IsPlayerInRange()
     {
-        return Vector3.Distance(transform.position, player.transform.position) <= range;
+        return Vector3.Distance(transform.position, player.transform.position) <= followRange;
     }
 
     IEnumerator ChooseDirection()
@@ -55,11 +74,13 @@ public class EnemyController : MonoBehaviour
         yield return new WaitForSeconds(Random.Range(2f, 8f));
         randomDir = new Vector3(0, 0, Random.Range(0, 360));
         Quaternion nextRotation = Quaternion.Euler(randomDir);
+        nextRotation.x = 0;
+        nextRotation.z = 0;
         transform.rotation = Quaternion.Lerp(transform.rotation, nextRotation, Random.Range(0.5f, 2.5f));
         chooseDir = false;
     }
 
-    void Wander()
+    public void Wander()
     {
         if (!chooseDir)
             StartCoroutine(ChooseDirection());
@@ -68,17 +89,53 @@ public class EnemyController : MonoBehaviour
             currentState = EnemyState.Follow;
     }
 
-    void Follow()
+    public void Follow()
     {
-        /*
-        Vector3 target = player.transform.position -  transform.position;
-        float angle = Mathf.Atan2(target.x, target.z) * Mathf.Rad2Deg;
-        transform.SetPositionAndRotation(speed * Time.deltaTime * -transform.right, Quaternion.AngleAxis(angle - 180, Vector3.forward));
-        */
+        LookAtPlayer();
         transform.position = Vector3.MoveTowards(transform.position, player.transform.position, speed * Time.deltaTime);
     }
 
-    void Die()
+    public void Attack() 
+    {
+        LookAtPlayer();
+        if (!coolingDown)
+            switch (enemyType)
+            {
+                case EnemyType.Contact:
+                    player.GetDamage(1);
+                    StartCoroutine(CoolDown());
+                    break;
+                case EnemyType.Melee:
+                    break;
+                case EnemyType.Ranged:
+                    GameObject bullet = Instantiate(bulletPrefab, transform.position + transform.forward * 1.1f, Quaternion.identity);
+                    bullet.GetComponent<BulletController>().SetBullet(player.transform);
+                    StartCoroutine(CoolDown());
+                    break;
+            }
+    }
+
+    void LookAtPlayer()
+    {
+        Quaternion rot = Quaternion.Slerp(transform.rotation, Quaternion.LookRotation(player.transform.position - transform.position), Time.deltaTime * 100f);
+        rot.x = 0;
+        rot.z = 0;
+        transform.rotation = rot;
+    }
+
+    public IEnumerator CoolDown()
+    {
+        coolingDown = true;
+        yield return new WaitForSeconds(attackCoolDown);
+        coolingDown = false;
+    }
+
+    public void TakeDamage(float damage)
+    {
+        health -= damage;
+    }
+
+    public virtual void Die()
     {
         Destroy(gameObject);
     }

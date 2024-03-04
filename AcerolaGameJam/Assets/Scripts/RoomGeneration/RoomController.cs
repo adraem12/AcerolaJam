@@ -19,9 +19,11 @@ public class RoomController : MonoBehaviour
     List<RoomScript> loadedRooms = new();
     bool isLoadingRoom = false;
     bool spawnedBossRoom = false;
+    bool spawnedExtraRooms = false;
     bool updatedRooms = false;
     public List<GameObject> startRoomPrefabs;
     public List<GameObject> emptyRoomPrefabs;
+    public List<GameObject> itemRoomPrefabs;
     public List<GameObject> endRoomPrefabs;
 
     private void Awake()
@@ -41,8 +43,8 @@ public class RoomController : MonoBehaviour
         if(loadRoomQueue.Count == 0)
         {
             if (!spawnedBossRoom)
-                StartCoroutine(SpawnBossRoom());
-            else if (spawnedBossRoom && !updatedRooms)
+                StartCoroutine(SpawnExtraRooms());
+            else if (spawnedExtraRooms && !updatedRooms)
             {
                 foreach (RoomScript room in loadedRooms)
                     room.RemoveUnconnectedDoors();
@@ -57,15 +59,17 @@ public class RoomController : MonoBehaviour
             newRoom = startRoomPrefabs[Random.Range(0, startRoomPrefabs.Count - 1)];
         else if (currentLoadRoomData.name == "Empty")
             newRoom = emptyRoomPrefabs[Random.Range(0, emptyRoomPrefabs.Count - 1)];
+        else if (currentLoadRoomData.name == "Item")
+            newRoom = itemRoomPrefabs[Random.Range(0, itemRoomPrefabs.Count - 1)];
         else if (currentLoadRoomData.name == "End")
             newRoom = endRoomPrefabs[Random.Range(0, endRoomPrefabs.Count - 1)];
         Instantiate(newRoom);
     }
 
-    IEnumerator SpawnBossRoom()
+    IEnumerator SpawnExtraRooms()
     {
-        spawnedBossRoom=true;
-        yield return new WaitForSeconds(0.5f);
+        spawnedBossRoom = true;
+        yield return new WaitForSeconds(0.2f);
         if (loadRoomQueue.Count == 0)
         {
             RoomScript bossRoom = loadedRooms.Last();
@@ -73,7 +77,22 @@ public class RoomController : MonoBehaviour
             Destroy(bossRoom.gameObject);
             loadedRooms.Remove(loadedRooms.Single(r => r.x == tempRoom.x && r.z == tempRoom.y));
             LoadRoom("End", tempRoom.x, tempRoom.y);
+            StartCoroutine(SpawnItemRoom());
         }
+    }
+
+    IEnumerator SpawnItemRoom()
+    {
+        spawnedExtraRooms = true;
+        yield return new WaitForSeconds(0.2f);
+        List<RoomScript> roomListByDistance = new(loadedRooms);
+        roomListByDistance.RemoveAt(0);
+        roomListByDistance.Sort((a, b) => Vector3.Distance(a.GetRoomCenter(), loadedRooms.Last().GetRoomCenter()).CompareTo(Vector3.Distance(b.GetRoomCenter(), loadedRooms.Last().GetRoomCenter())));
+        RoomScript itemRoom = roomListByDistance.Last();
+        Vector2Int tempRoom = new(itemRoom.x, itemRoom.z);
+        Destroy(itemRoom.gameObject);
+        loadedRooms.Remove(loadedRooms.Single(r => r.x == tempRoom.x && r.z == tempRoom.y));
+        LoadRoom("Item", tempRoom.x, tempRoom.y);
     }
 
     public void LoadRoom(string name, int x, int z)

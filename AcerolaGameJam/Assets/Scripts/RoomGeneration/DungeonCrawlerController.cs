@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 public enum Direction
@@ -23,13 +24,23 @@ public class DungeonCrawlerController : MonoBehaviour
         List<DungeonCrawlerScript> dungeonCrawlers = new();
         for (int i = 0; i < dungeonData.numberOfCrawlers; ++i)
             dungeonCrawlers.Add(new DungeonCrawlerScript(Vector2Int.zero));
-        int iterations = Random.Range(dungeonData.iterationMin, dungeonData.iterationMax);
-        for (int i = 0; i < iterations; ++i)
+        for (int i = 0; i < dungeonData.iterations; ++i)
             foreach (DungeonCrawlerScript dungeonCrawler in dungeonCrawlers)
             {
                 Vector2Int newPosition = dungeonCrawler.Move(directionMovementMap);
                 positionsVisited.Add(newPosition);
             }
+        positionsVisited = positionsVisited.Distinct().ToList();
+        if (positionsVisited.Count < dungeonData.totalRooms)
+            for (int i = 0; i < dungeonData.iterations; ++i)
+                foreach (DungeonCrawlerScript dungeonCrawler in dungeonCrawlers)
+                {
+                    Vector2Int newPosition = dungeonCrawler.Move(directionMovementMap);
+                    positionsVisited.Add(newPosition);
+                }
+        positionsVisited = positionsVisited.Distinct().ToList();
+        if(positionsVisited.Count > dungeonData.totalRooms)
+            positionsVisited.RemoveRange(14, positionsVisited.Count - 14);
         return positionsVisited;
     }
 }
