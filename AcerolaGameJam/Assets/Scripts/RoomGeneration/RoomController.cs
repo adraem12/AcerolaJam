@@ -48,6 +48,7 @@ public class RoomController : MonoBehaviour
             {
                 foreach (RoomScript room in loadedRooms)
                     room.RemoveUnconnectedDoors();
+                UpdateRooms();
                 updatedRooms = true;
             }
             return;
@@ -143,5 +144,25 @@ public class RoomController : MonoBehaviour
     {
         CameraController.instance.currentRoom = room;
         currentRoom = room;
+        UpdateRooms();
+    }
+
+    void UpdateRooms()
+    {
+        foreach (RoomScript room in loadedRooms)
+            if (currentRoom != room)
+            {
+                EnemyController[] enemies = room.GetComponentsInChildren<EnemyController>();
+                if (enemies != null)
+                    foreach (EnemyController enemy in enemies)
+                        enemy.notInRoom = true;
+            }
+            else
+            {
+                EnemyController[] enemies = room.GetComponentsInChildren<EnemyController>();
+                if (enemies != null)
+                    foreach (EnemyController enemy in enemies)
+                        enemy.notInRoom = false;
+            }
     }
 }

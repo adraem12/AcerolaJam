@@ -8,11 +8,13 @@ public class PlayerController : MonoBehaviour
     static int maxHealth = 4;
     static float damage = 1;
     static float attackSpeed = 0.5f;
+    static float range = 1;
     static float movementSpeed = 4f;
     public int Health { get => health; set => health = value; }
     public int MaxHealth { get => maxHealth; set => maxHealth = value; }
     public float Damage { get => damage; set => damage = value; }
     public float AttackSpeed { get => attackSpeed; set => attackSpeed = value; }
+    public float Range { get => range; set => range = value; }
     public float MovementSpeed { get => movementSpeed; set => movementSpeed = value; }
     public static event EventHandler OnStatsChange;
     float lookSpeed = 50;

@@ -6,8 +6,9 @@ using UnityEngine.UI;
 public class UIManager : MonoBehaviour
 {
     public TextMeshProUGUI healthText;
+    public TextMeshProUGUI attackSpeedText;
+    public TextMeshProUGUI rangeText;
     public TextMeshProUGUI moveSpeedText;
-    public TextMeshProUGUI fireRateText;
     public RectTransform itemsParent;
 
     // Start is called before the first frame update
@@ -20,8 +21,9 @@ public class UIManager : MonoBehaviour
     void UpdateStats(object sender, EventArgs e)
     {
         healthText.text = "Health: " + GameManager.instance.playerController.Health + " / " + GameManager.instance.playerController.MaxHealth;
+        attackSpeedText.text = "AttackSpeed: " + GameManager.instance.playerController.AttackSpeed.ToString("0.00");
+        rangeText.text = "Range: " + GameManager.instance.playerController.Range.ToString("0.00");
         moveSpeedText.text = "MoveSpeed: " + GameManager.instance.playerController.MovementSpeed.ToString("0.00");
-        fireRateText.text = "MoveSpeed: " + GameManager.instance.playerController.AttackSpeed.ToString("0.00");
     }
 
     public void CreateItemImage(Texture2D image)
