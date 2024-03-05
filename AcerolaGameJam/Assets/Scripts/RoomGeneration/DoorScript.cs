@@ -10,25 +10,26 @@ public class DoorScript : MonoBehaviour
     public DoorType type;
     public GameObject doorObject;
     public GameObject[] wallObjects;
-    float doorOffset = 1.75f;
+    float doorOffset = 4f;
 
     private void OnTriggerEnter(Collider other)
     {
+        Debug.Log(other);
         if (other.CompareTag("Player"))
         {
             switch (type)
             {
                 case DoorType.top:
-                    other.transform.position = new Vector3(transform.position.x, transform.position.y, transform.position.z + doorOffset);
+                    GameManager.instance.playerController.transform.position = new Vector3(transform.position.x, transform.position.y, transform.position.z + doorOffset);
                     break;
                 case DoorType.right:
-                    other.transform.position = new Vector3(transform.position.x + doorOffset, transform.position.y, transform.position.z);
+                    GameManager.instance.playerController.transform.position = new Vector3(transform.position.x + doorOffset, transform.position.y, transform.position.z);
                     break;
                 case DoorType.down:
-                    other.transform.position = new Vector3(transform.position.x, transform.position.y, transform.position.z - doorOffset);
+                    GameManager.instance.playerController.transform.position = new Vector3(transform.position.x, transform.position.y, transform.position.z - doorOffset);
                     break;
                 case DoorType.left:
-                    other.transform.position = new Vector3(transform.position.x - doorOffset, transform.position.y, transform.position.z);
+                    GameManager.instance.playerController.transform.position = new Vector3(transform.position.x - doorOffset, transform.position.y, transform.position.z);
                     break;
             }
         }

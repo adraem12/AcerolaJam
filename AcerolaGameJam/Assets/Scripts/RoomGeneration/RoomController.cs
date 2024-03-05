@@ -48,7 +48,7 @@ public class RoomController : MonoBehaviour
             {
                 foreach (RoomScript room in loadedRooms)
                     room.RemoveUnconnectedDoors();
-                UpdateRooms();
+                StartCoroutine(RoomCoroutine());
                 updatedRooms = true;
             }
             return;
@@ -144,6 +144,12 @@ public class RoomController : MonoBehaviour
     {
         CameraController.instance.currentRoom = room;
         currentRoom = room;
+        StartCoroutine(RoomCoroutine());
+    }
+
+    public IEnumerator RoomCoroutine()
+    {
+        yield return new WaitForSeconds(0.2f);
         UpdateRooms();
     }
 
@@ -156,13 +162,22 @@ public class RoomController : MonoBehaviour
                 if (enemies != null)
                     foreach (EnemyController enemy in enemies)
                         enemy.notInRoom = true;
+                foreach (DoorScript door in room.doors)
+                    door.OpenDoor();
             }
             else
             {
                 EnemyController[] enemies = room.GetComponentsInChildren<EnemyController>();
-                if (enemies != null)
+                if (enemies.Length > 0)
+                {
                     foreach (EnemyController enemy in enemies)
                         enemy.notInRoom = false;
+                    foreach (DoorScript door in room.doors)
+                        door.CloseDoor();
+                }
+                else
+                    foreach (DoorScript door in room.doors)
+                        door.OpenDoor();
             }
     }
 }

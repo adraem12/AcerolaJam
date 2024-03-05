@@ -4663,6 +4663,11 @@ MonoBehaviour:
   - {fileID: 2221782600678650550}
   - {fileID: 3800756320595632206}
   - {fileID: 6679191145021030692}
+  enemies:
+  - enemyPrefab: {fileID: 8957035106755095940, guid: 496a1bd399b503f4d8691b07b0e2fd95, type: 3}
+    quantity: 2
+  - enemyPrefab: {fileID: 3232560447329665202, guid: 4f361fa6a00a57046b4c95b9a34b78ed, type: 3}
+    quantity: 1
 --- !u!65 &2706739869818817202
 BoxCollider:
   m_ObjectHideFlags: 0

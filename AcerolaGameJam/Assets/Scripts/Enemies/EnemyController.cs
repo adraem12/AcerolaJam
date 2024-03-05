@@ -150,6 +150,7 @@ public class EnemyController : MonoBehaviour
 
     void Die()
     {
+        RoomController.instance.StartCoroutine(RoomController.instance.RoomCoroutine());
         Destroy(gameObject);
     }
 }

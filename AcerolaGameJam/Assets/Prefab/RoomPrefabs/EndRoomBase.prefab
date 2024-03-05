@@ -903,6 +903,9 @@ MonoBehaviour:
   - {fileID: 5429488361931283116}
   - {fileID: 3632533701577297337}
   - {fileID: 4884292454661870784}
+  enemies:
+  - enemyPrefab: {fileID: 8957035106755095940, guid: 496a1bd399b503f4d8691b07b0e2fd95, type: 3}
+    quantity: 1
 --- !u!65 &7239038259742583638
 BoxCollider:
   m_ObjectHideFlags: 0

@@ -12,7 +12,7 @@ public class GridController : MonoBehaviour
     }
     public Grid grid;
     public GameObject gridTile;
-    public List<Vector2> availablePoints = new();
+    public List<Vector3> availablePoints = new();
 
     private void Awake()
     {
@@ -27,8 +27,7 @@ public class GridController : MonoBehaviour
         grid.lengthOffset += room.transform.localPosition.x;
         grid.widthOffset += room.transform.localPosition.z;
         for (int z = 0; z < grid.rows; z++)
-
             for (int x = 0; x < grid.columns; x++)
-                availablePoints.Add(new Vector2(x, z));
+                availablePoints.Add(new Vector3(x, 0, z));
     }
 }

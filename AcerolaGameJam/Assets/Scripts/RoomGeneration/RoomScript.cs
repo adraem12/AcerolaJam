@@ -13,6 +13,14 @@ public class RoomScript : MonoBehaviour
     public DoorScript downDoor;
     public DoorScript leftDoor;
     public List<DoorScript> doors = new();
+    GridController gridController;
+    [System.Serializable]
+    public struct EnemyList
+    {
+        public GameObject enemyPrefab;
+        public int quantity;
+    }
+    public EnemyList[] enemies;
 
     void Start()
     {
@@ -22,6 +30,8 @@ public class RoomScript : MonoBehaviour
             return;
         }
         RoomController.instance.RegisterRoom(this);
+        gridController = GetComponentInChildren<GridController>();
+        SpawnEnemies();
     }
 
     private void Update()
@@ -87,15 +97,22 @@ public class RoomScript : MonoBehaviour
         return new Vector3 (x * width, 0, z * length);
     }
 
-    private void OnTriggerEnter(Collider other)
+    void SpawnEnemies()
     {
-        if (other.CompareTag("Player"))
-            RoomController.instance.OnPlayerEnterRoom(this);
+        Vector3 roomSpawnPoint = GetRoomCenter() - new Vector3 (gridController.grid.columns / 2f, 0, gridController.grid.rows / 2f);
+        foreach (EnemyList enemy in enemies)
+            for (int i = 0; i < enemy.quantity; i++)
+            {
+                Vector3 currentPoint = gridController.availablePoints[Random.Range(0, gridController.availablePoints.Count - 1)];
+                Instantiate(enemy.enemyPrefab, roomSpawnPoint + currentPoint, Quaternion.identity, transform);
+                gridController.availablePoints.Remove(currentPoint);
+            }
     }
 
-    private void OnDrawGizmos()
+    void OnTriggerEnter(Collider other)
     {
-        Gizmos.color = Color.red;
-        Gizmos.DrawWireCube(transform.position, new Vector3(width, 0, length));
+        Debug.Log("a");
+        if (other.CompareTag("Player"))
+            RoomController.instance.OnPlayerEnterRoom(this);
     }
 }
