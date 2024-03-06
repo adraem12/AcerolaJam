@@ -11,23 +11,27 @@ public class GridController : MonoBehaviour
         public float widthOffset, lengthOffset;
     }
     public Grid grid;
-    public GameObject gridTile;
     public List<Vector3> availablePoints = new();
 
-    private void Awake()
+    private void Start()
     {
         room = GetComponentInParent<RoomScript>();
         grid.columns = room.width - 2;
         grid.rows = room.length - 2;
-        GenerateGrid();
     }
 
-    void GenerateGrid()
+    public void GenerateGrid()
     {
         grid.lengthOffset += room.transform.localPosition.x;
         grid.widthOffset += room.transform.localPosition.z;
         for (int z = 0; z < grid.rows; z++)
             for (int x = 0; x < grid.columns; x++)
-                availablePoints.Add(new Vector3(x, 0, z));
+            {
+                Vector3 gridPoint = new(x, 0, z);
+                RaycastHit[] hit = new RaycastHit[1];
+                Physics.RaycastNonAlloc(room.GetRoomCorner() + gridPoint + Vector3.up * 3f, Vector3.down, hit, 10f, LayerMask.GetMask("Scenery"));
+                if (hit[0].collider != null && hit[0].collider.name == "Floor")
+                    availablePoints.Add(gridPoint);
+            }
     }
 }

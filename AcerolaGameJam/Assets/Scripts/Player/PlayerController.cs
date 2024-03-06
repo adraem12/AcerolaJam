@@ -7,12 +7,14 @@ public class PlayerController : MonoBehaviour
     static int health;
     static int maxHealth = 4;
     static float damage = 1;
+    static float attackRate = 0.5f;
     static float attackSpeed = 0.5f;
     static float range = 1;
     static float movementSpeed = 4f;
     public int Health { get => health; set => health = value; }
     public int MaxHealth { get => maxHealth; set => maxHealth = value; }
     public float Damage { get => damage; set => damage = value; }
+    public float AttackRate { get => attackRate; set => attackRate = value; }
     public float AttackSpeed { get => attackSpeed; set => attackSpeed = value; }
     public float Range { get => range; set => range = value; }
     public float MovementSpeed { get => movementSpeed; set => movementSpeed = value; }
@@ -72,7 +74,7 @@ public class PlayerController : MonoBehaviour
 
     }
 
-    public void TakeObject(int healthChange, float moveSpeedChange, float attackSpeedChange, float sizeChange, Texture2D image, ObjectController.ItemType type)
+    public void TakeObject(int healthChange, float moveSpeedChange, float damageChange, float attackRateChange, float attackSpeedChange, float sizeChange, Texture2D image, ObjectController.ItemType type)
     {
         if (type == ObjectController.ItemType.Consumable)
             health += healthChange;
@@ -83,6 +85,8 @@ public class PlayerController : MonoBehaviour
             GameManager.instance.uiManager.CreateItemImage(image);
         }
         movementSpeed += moveSpeedChange;
+        damage += damage;
+        attackRate += attackRateChange;
         attackSpeed += attackSpeedChange;
         transform.localScale += Vector3.one * sizeChange;
         OnStatsChange?.Invoke(this, EventArgs.Empty);

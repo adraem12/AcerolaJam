@@ -10,26 +10,25 @@ public class DoorScript : MonoBehaviour
     public DoorType type;
     public GameObject doorObject;
     public GameObject[] wallObjects;
-    float doorOffset = 4f;
+    float doorOffset = 3f;
 
     private void OnTriggerEnter(Collider other)
     {
-        Debug.Log(other);
         if (other.CompareTag("Player"))
         {
             switch (type)
             {
                 case DoorType.top:
-                    GameManager.instance.playerController.transform.position = new Vector3(transform.position.x, transform.position.y, transform.position.z + doorOffset);
+                    GameManager.instance.playerController.transform.position = new Vector3(other.transform.position.x, other.transform.position.y, other.transform.position.z + doorOffset);
                     break;
                 case DoorType.right:
-                    GameManager.instance.playerController.transform.position = new Vector3(transform.position.x + doorOffset, transform.position.y, transform.position.z);
+                    GameManager.instance.playerController.transform.position = new Vector3(other.transform.position.x + doorOffset, other.transform.position.y, other.transform.position.z);
                     break;
                 case DoorType.down:
-                    GameManager.instance.playerController.transform.position = new Vector3(transform.position.x, transform.position.y, transform.position.z - doorOffset);
+                    GameManager.instance.playerController.transform.position = new Vector3(other.transform.position.x, other.transform.position.y, other.transform.position.z - doorOffset);
                     break;
                 case DoorType.left:
-                    GameManager.instance.playerController.transform.position = new Vector3(transform.position.x - doorOffset, transform.position.y, transform.position.z);
+                    GameManager.instance.playerController.transform.position = new Vector3(other.transform.position.x - doorOffset, other.transform.position.y, other.transform.position.z);
                     break;
             }
         }

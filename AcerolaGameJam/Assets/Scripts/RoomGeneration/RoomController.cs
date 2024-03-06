@@ -70,7 +70,7 @@ public class RoomController : MonoBehaviour
     IEnumerator SpawnExtraRooms()
     {
         spawnedBossRoom = true;
-        yield return new WaitForSeconds(0.2f);
+        yield return new WaitForSeconds(0.15f);
         if (loadRoomQueue.Count == 0)
         {
             RoomScript bossRoom = loadedRooms.Last();
@@ -85,7 +85,7 @@ public class RoomController : MonoBehaviour
     IEnumerator SpawnItemRoom()
     {
         spawnedExtraRooms = true;
-        yield return new WaitForSeconds(0.2f);
+        yield return new WaitForSeconds(0.15f);
         List<RoomScript> roomListByDistance = new(loadedRooms);
         roomListByDistance.RemoveAt(0);
         roomListByDistance.Sort((a, b) => Vector3.Distance(a.GetRoomCenter(), loadedRooms.Last().GetRoomCenter()).CompareTo(Vector3.Distance(b.GetRoomCenter(), loadedRooms.Last().GetRoomCenter())));
@@ -117,11 +117,11 @@ public class RoomController : MonoBehaviour
             room.x = currentLoadRoomData.x;
             room.z = currentLoadRoomData.z;
             room.name += "_" + room.x + "-" + room.z;
-            room.transform.parent = transform;
             isLoadingRoom = false;
             if (loadedRooms.Count == 0)
                 CameraController.instance.currentRoom = room;
             loadedRooms.Add(room);
+            room.StartCoroutine(room.Init());
         }
         else
         {
@@ -149,7 +149,7 @@ public class RoomController : MonoBehaviour
 
     public IEnumerator RoomCoroutine()
     {
-        yield return new WaitForSeconds(0.2f);
+        yield return new WaitForSeconds(0.3f);
         UpdateRooms();
     }
 

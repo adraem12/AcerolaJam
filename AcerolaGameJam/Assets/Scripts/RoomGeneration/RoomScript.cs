@@ -1,3 +1,4 @@
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -30,7 +31,13 @@ public class RoomScript : MonoBehaviour
             return;
         }
         RoomController.instance.RegisterRoom(this);
+    }
+
+    public IEnumerator Init()
+    {
         gridController = GetComponentInChildren<GridController>();
+        yield return new WaitForSeconds(0.2f);
+        gridController.GenerateGrid();
         SpawnEnemies();
     }
 
@@ -97,21 +104,24 @@ public class RoomScript : MonoBehaviour
         return new Vector3 (x * width, 0, z * length);
     }
 
+    public Vector3 GetRoomCorner()
+    {
+        return GetRoomCenter() - new Vector3(gridController.grid.columns / 2f, 0, gridController.grid.rows / 2f) + Vector3.one * 0.5f;
+    }
+
     void SpawnEnemies()
     {
-        Vector3 roomSpawnPoint = GetRoomCenter() - new Vector3 (gridController.grid.columns / 2f, 0, gridController.grid.rows / 2f);
         foreach (EnemyList enemy in enemies)
             for (int i = 0; i < enemy.quantity; i++)
             {
                 Vector3 currentPoint = gridController.availablePoints[Random.Range(0, gridController.availablePoints.Count - 1)];
-                Instantiate(enemy.enemyPrefab, roomSpawnPoint + currentPoint, Quaternion.identity, transform);
+                Instantiate(enemy.enemyPrefab, GetRoomCorner() + currentPoint, Quaternion.identity, transform);
                 gridController.availablePoints.Remove(currentPoint);
             }
     }
 
     void OnTriggerEnter(Collider other)
     {
-        Debug.Log("a");
         if (other.CompareTag("Player"))
             RoomController.instance.OnPlayerEnterRoom(this);
     }
