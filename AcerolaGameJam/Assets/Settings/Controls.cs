@@ -44,6 +44,15 @@ public partial class @Controls: IInputActionCollection2, IDisposable
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": true
+                },
+                {
+                    ""name"": ""Attack"",
+                    ""type"": ""Button"",
+                    ""id"": ""9e343303-b162-4efc-b8f7-f8ffdaf2b22d"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
                 }
             ],
             ""bindings"": [
@@ -156,6 +165,17 @@ public partial class @Controls: IInputActionCollection2, IDisposable
                     ""action"": ""Look"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": true
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""bebea37d-7cfc-44cd-b42f-21f94f4505eb"",
+                    ""path"": ""<Keyboard>/space"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Attack"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
                 }
             ]
         }
@@ -172,6 +192,7 @@ public partial class @Controls: IInputActionCollection2, IDisposable
         m_PlayMap = asset.FindActionMap("PlayMap", throwIfNotFound: true);
         m_PlayMap_Movement = m_PlayMap.FindAction("Movement", throwIfNotFound: true);
         m_PlayMap_Look = m_PlayMap.FindAction("Look", throwIfNotFound: true);
+        m_PlayMap_Attack = m_PlayMap.FindAction("Attack", throwIfNotFound: true);
     }
 
     public void Dispose()
@@ -235,12 +256,14 @@ public partial class @Controls: IInputActionCollection2, IDisposable
     private List<IPlayMapActions> m_PlayMapActionsCallbackInterfaces = new List<IPlayMapActions>();
     private readonly InputAction m_PlayMap_Movement;
     private readonly InputAction m_PlayMap_Look;
+    private readonly InputAction m_PlayMap_Attack;
     public struct PlayMapActions
     {
         private @Controls m_Wrapper;
         public PlayMapActions(@Controls wrapper) { m_Wrapper = wrapper; }
         public InputAction @Movement => m_Wrapper.m_PlayMap_Movement;
         public InputAction @Look => m_Wrapper.m_PlayMap_Look;
+        public InputAction @Attack => m_Wrapper.m_PlayMap_Attack;
         public InputActionMap Get() { return m_Wrapper.m_PlayMap; }
         public void Enable() { Get().Enable(); }
         public void Disable() { Get().Disable(); }
@@ -256,6 +279,9 @@ public partial class @Controls: IInputActionCollection2, IDisposable
             @Look.started += instance.OnLook;
             @Look.performed += instance.OnLook;
             @Look.canceled += instance.OnLook;
+            @Attack.started += instance.OnAttack;
+            @Attack.performed += instance.OnAttack;
+            @Attack.canceled += instance.OnAttack;
         }
 
         private void UnregisterCallbacks(IPlayMapActions instance)
@@ -266,6 +292,9 @@ public partial class @Controls: IInputActionCollection2, IDisposable
             @Look.started -= instance.OnLook;
             @Look.performed -= instance.OnLook;
             @Look.canceled -= instance.OnLook;
+            @Attack.started -= instance.OnAttack;
+            @Attack.performed -= instance.OnAttack;
+            @Attack.canceled -= instance.OnAttack;
         }
 
         public void RemoveCallbacks(IPlayMapActions instance)
@@ -296,5 +325,6 @@ public partial class @Controls: IInputActionCollection2, IDisposable
     {
         void OnMovement(InputAction.CallbackContext context);
         void OnLook(InputAction.CallbackContext context);
+        void OnAttack(InputAction.CallbackContext context);
     }
 }

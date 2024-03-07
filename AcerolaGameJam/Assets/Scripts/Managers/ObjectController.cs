@@ -24,7 +24,7 @@ public class ObjectController : MonoBehaviour
     {
         if (other.CompareTag("Player"))
         {
-            other.GetComponent<PlayerController>().TakeObject(healthChange, moveSpeedChange, damageChange, attackRateChange, attackSpeedChange, sizeChange, image, type);
+            other.GetComponent<PlayerController>().TakeObject(healthChange, moveSpeedChange, damageChange, attackSpeedChange, sizeChange, image, type);
             Destroy(gameObject);
         }
     }

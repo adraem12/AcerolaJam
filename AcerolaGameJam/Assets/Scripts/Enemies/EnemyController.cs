@@ -66,8 +66,6 @@ public class EnemyController : MonoBehaviour
                 currentState = EnemyState.Wander;
             if (Vector3.Distance(transform.position, player.transform.position) <= attackRange)
                 currentState = EnemyState.Attack;
-            if (health <= 0)
-                currentState = EnemyState.Die;
         }
         else
             currentState = EnemyState.Idle;
@@ -146,6 +144,9 @@ public class EnemyController : MonoBehaviour
     public void TakeDamage(float damage)
     {
         health -= damage;
+        Debug.Log(health);
+        if (health <= 0)
+            currentState = EnemyState.Die;
     }
 
     void Die()

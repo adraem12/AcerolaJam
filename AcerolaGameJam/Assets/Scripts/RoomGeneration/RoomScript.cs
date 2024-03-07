@@ -115,7 +115,8 @@ public class RoomScript : MonoBehaviour
             for (int i = 0; i < enemy.quantity; i++)
             {
                 Vector3 currentPoint = gridController.availablePoints[Random.Range(0, gridController.availablePoints.Count - 1)];
-                Instantiate(enemy.enemyPrefab, GetRoomCorner() + currentPoint, Quaternion.identity, transform);
+                GameObject newEnemy = Instantiate(enemy.enemyPrefab, GetRoomCorner() + currentPoint, Quaternion.identity, transform);
+                newEnemy.transform.position = new Vector3(newEnemy.transform.position.x, 1, newEnemy.transform.position.z);
                 gridController.availablePoints.Remove(currentPoint);
             }
     }
