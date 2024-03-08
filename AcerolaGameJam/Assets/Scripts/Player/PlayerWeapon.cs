@@ -1,16 +1,9 @@
-using System.Collections;
 using System.Collections.Generic;
-using System.Net;
 using UnityEngine;
+using SplineMesh;
 
 public static class Bezier
 {
-    public static Vector3 QuadraticBezierCurve(Vector3 a, Vector3 b, Vector3 c, float t)
-    {
-        Vector3 pos = 2 * (c - (2 * b) + a);
-        return pos;
-    }
-
     public static Vector3 CubicBezierCurve(Vector3 a, Vector3 b, Vector3 c, Vector3 d, float t)
     {
         Vector3 pos = Mathf.Pow(1 - t, 3) * a + 3 * Mathf.Pow(1 - t, 2) * t * b + 3 * (1 - t) * Mathf.Pow(t, 2) * c + Mathf.Pow(t, 3) * d;
@@ -22,11 +15,6 @@ public static class Bezier
         Vector3 pos = a + t * (b - a);
         return pos;
     }
-    public static float LinearFloatCurve(float a, float b, float t)
-    {
-        float ans = a + t * (b - a);
-        return ans;
-    }
 }
 
 public class PlayerWeapon : MonoBehaviour
@@ -34,19 +22,21 @@ public class PlayerWeapon : MonoBehaviour
     [Header("Variables")]
     [SerializeField] Transform weaponModel;
     public Transform weaponController;
-    [SerializeField] Transform[] chainPoints;
-    [SerializeField] LineRenderer chainLine;
+    [SerializeField] Transform[] whipPoints;
+    [SerializeField] Spline whipSpline;
     [SerializeField] LayerMask wallLayers;
     PlayerController player;
     List<Vector3> newPoints = new();
     List<Vector3> finalPoints = new();
     float currentDis, slidingRequired, requiredDis;
-    public bool performingAttack;
-    public bool canDamage;
+    [HideInInspector] public bool performingAttack;
+    [HideInInspector] public bool canDamage;
     [Header("Adjustments")]
     [SerializeField] float curveSizeMultiplier = 1;
-    [Range(0.02f, 0.2f)][SerializeField] float curveSmoothing = 0.1f;
     [Range(0, 2)][SerializeField] float rayDistance = 1;
+    [SerializeField] float frequency = 1;
+    [SerializeField] float magnitude = 1;
+
 
     private void Start()
     {
@@ -61,7 +51,7 @@ public class PlayerWeapon : MonoBehaviour
 
     private void CheckWalls()
     {
-        Vector3 startPoint = chainPoints[0].position;
+        Vector3 startPoint = whipPoints[0].position;
         Vector3 tipPoint = Bezier.LinearBezierCurve(startPoint, weaponController.position, rayDistance);
         Debug.DrawLine(startPoint, tipPoint, Color.blue);
         requiredDis = (tipPoint - startPoint).magnitude;
@@ -90,25 +80,22 @@ public class PlayerWeapon : MonoBehaviour
     }
 
     void GetNewPoints()
-    {
-        newPoints.Clear(); 
-        Vector3 firstPoint = chainPoints[0].position;
+    {        
+        newPoints.Clear();
+        Vector3 firstPoint = whipPoints[0].position;
         newPoints.Add(firstPoint);
-        Vector3 secondPoint = firstPoint + chainPoints[0].localScale.x * curveSizeMultiplier * GetDir(0);
+        Vector3 secondPoint = firstPoint + curveSizeMultiplier * whipPoints[0].forward;
+        secondPoint += magnitude * Mathf.Cos(Time.time * frequency) * transform.right + magnitude * Mathf.Sin(Time.time * frequency) * transform.up;
         secondPoint = GetDistance(firstPoint, secondPoint);
         newPoints.Add(secondPoint);
-        Vector3 finalPoint = GetDistance(chainPoints[0].position, chainPoints[1].position);
-        Vector3 thirdPoint = finalPoint - chainPoints[1].localScale.x * curveSizeMultiplier * GetDir(1);
+        Vector3 finalPoint = GetDistance(whipPoints[0].position, whipPoints[1].position);
+        Vector3 thirdPoint = finalPoint - curveSizeMultiplier * whipPoints[1].forward;
+        thirdPoint += magnitude * Mathf.Sin(Time.time * frequency) * Vector3.right + magnitude * Mathf.Cos(Time.time * frequency) * Vector3.up;
         thirdPoint = GetDistance(finalPoint, thirdPoint);
         newPoints.Add(thirdPoint);
         newPoints.Add(finalPoint);
         SubdividePoints();
-    }
-
-    Vector3 GetDir(int i)
-    {
-        Vector3 calculationDir = chainPoints[i].forward;
-        return calculationDir;
+        
     }
 
     Vector3 GetDistance(Vector3 prevPoint, Vector3 curPoint)
@@ -120,25 +107,21 @@ public class PlayerWeapon : MonoBehaviour
     void SubdividePoints()
     {
         finalPoints.Clear();
-        for (int i = 0; i < newPoints.Count - 1; i += 3)
-            for (float j = 0; j < 1; j += curveSmoothing)
-            {
-                Vector3 points = Bezier.CubicBezierCurve(newPoints[i], newPoints[i + 1], newPoints[i + 2], newPoints[i + 3], j);
-                finalPoints.Add(points);
-            }
-        finalPoints[0] = chainPoints[0].position;
+        for (float i = 0; i < 1; i += 0.1f)
+        {
+            Vector3 point = Bezier.CubicBezierCurve(newPoints[0], newPoints[1], newPoints[2], newPoints[3], i);
+            finalPoints.Add(point);
+        }
+        finalPoints[0] = whipPoints[0].position;
         finalPoints[^1] = newPoints[^1];
         UpdateChainRenderer();
     }
 
     void UpdateChainRenderer()
     {
-        if (finalPoints.Count <= 0) 
-            return;
         weaponModel.position = newPoints[^1];
-        chainLine.positionCount = finalPoints.Count;
         for (int i = 0; i < finalPoints.Count; i++)
-            chainLine.SetPosition(i, finalPoints[i]);
+            whipSpline.nodes[i].Position = finalPoints[i] /** 3.333f*/;
     }
 
     void OnDrawGizmos()
