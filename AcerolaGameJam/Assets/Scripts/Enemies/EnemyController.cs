@@ -28,7 +28,7 @@ public class EnemyController : MonoBehaviour
     public float speed;
     public float attackCoolDown;
     bool chooseDir = false;
-    public bool notInRoom = false;
+    public bool notInRoom = true;
     [HideInInspector] public bool coolingDown = false;
     Vector3 randomDir;
     public GameObject bulletPrefab;
@@ -42,9 +42,6 @@ public class EnemyController : MonoBehaviour
     {
         switch (currentState)
         {
-            case EnemyState.Idle:
-                Idle();
-                break;
             case EnemyState.Wander:
                 Wander();
                 break;
@@ -87,9 +84,6 @@ public class EnemyController : MonoBehaviour
         transform.rotation = Quaternion.Lerp(transform.rotation, nextRotation, Random.Range(0.5f, 2.5f));
         chooseDir = false;
     }
-
-
-    void Idle() { }
 
     void Wander()
     {

@@ -3,7 +3,7 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class UIManager : MonoBehaviour
+public class GameUIManager : MonoBehaviour
 {
     public TextMeshProUGUI healthText;
     public TextMeshProUGUI damageText;
@@ -12,7 +12,6 @@ public class UIManager : MonoBehaviour
     public TextMeshProUGUI moveSpeedText;
     public RectTransform itemsParent;
 
-    // Start is called before the first frame update
     void Start()
     {
         PlayerController.OnStatsChange += UpdateStats;
@@ -28,10 +27,10 @@ public class UIManager : MonoBehaviour
         moveSpeedText.text = "MoveSpeed: " + GameManager.instance.playerController.MovementSpeed.ToString("0.00");
     }
 
-    public void CreateItemImage(Texture2D image)
+    public void CreateItemImage(GameObject model)
     {
-        RawImage newItem = new GameObject().AddComponent<RawImage>();
-        newItem.transform.SetParent(itemsParent);
-        newItem.texture = image;
+        RectTransform item = Instantiate(model, itemsParent.transform).AddComponent<RectTransform>();
+        item.localScale = Vector3.one * 50;
+        item.gameObject.layer = LayerMask.NameToLayer("UI");
     }
 }

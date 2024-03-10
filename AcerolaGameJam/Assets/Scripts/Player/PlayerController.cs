@@ -2,6 +2,8 @@ using System;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using DG.Tweening;
+using System.Linq;
+using UnityEngine.Rendering;
 
 public class PlayerController : MonoBehaviour
 {
@@ -27,10 +29,16 @@ public class PlayerController : MonoBehaviour
     Rigidbody rb;
     Vector3 moveDirection;
     Vector3 lookDirection = Vector3.forward;
+    public Vector3 LookDirection { get => lookDirection; }
     public PlayerWeapon playerWeapon;
     Transform weaponController;
     bool attacking = false;
     Cooldown cooldown;
+    [SerializeField] GameObject[] tentacleControler;
+    Vector3[] tentacleOriginalPos;
+    [SerializeField] float frequency = 1;
+    [SerializeField] float magnitude = 1;
+    float maxSpeed;
 
     void Start()
     {
@@ -39,12 +47,16 @@ public class PlayerController : MonoBehaviour
         cooldown = new Cooldown();
         cooldown.SetCooldown(attackSpeed);
         health = maxHealth;
+        maxSpeed = new Vector3(movementSpeed, 0, movementSpeed).magnitude;
         OnStatsChange?.Invoke(this, EventArgs.Empty);
         GameManager.instance.controls.PlayMap.Movement.performed += ReadMovementInput;
         GameManager.instance.controls.PlayMap.Movement.canceled += ReadMovementInput;
         GameManager.instance.controls.PlayMap.Look.performed += ReadLookInput;
         GameManager.instance.controls.PlayMap.Attack.performed += ReadAttackInput;
         GameManager.instance.controls.PlayMap.Attack.canceled += ReadAttackInput;
+        tentacleOriginalPos = new Vector3[tentacleControler.Length];
+        for (int i = 0; i < tentacleControler.Length; i++)
+            tentacleOriginalPos[i] = tentacleControler[i].transform.localPosition;
     }
 
     void ReadMovementInput(InputAction.CallbackContext context)
@@ -72,6 +84,7 @@ public class PlayerController : MonoBehaviour
         rot.x = 0;
         rot.z = 0;
         rb.rotation = rot;
+        MoveTentacles();
         if (!cooldown.IsCoolingDown && attacking)
             Attack();
     }
@@ -96,12 +109,18 @@ public class PlayerController : MonoBehaviour
         playerWeapon.canDamage = true;
         float attackSpeed1 = attackSpeed * 0.9f * 0.15f;
         float attackSpeed2 = attackSpeed * 0.9f * 0.85f;
-        weaponController.DOLocalMove(Vector3.right * range, attackSpeed1).SetEase(Ease.InOutQuint).OnComplete(() => 
+        weaponController.DOLocalMove(Vector3.forward * range, attackSpeed1).SetEase(Ease.InOutQuint).OnComplete(() => 
         {
-            weaponController.DOLocalMove(Vector3.zero, attackSpeed2).SetEase(Ease.InOutCirc).OnComplete(() =>
+            weaponController.DOLocalMove(Vector3.forward * 0.01f, attackSpeed2).SetEase(Ease.InOutCirc).OnComplete(() =>
             playerWeapon.performingAttack = false);
         });
         cooldown.StartCooldown();
+    }
+
+    void MoveTentacles()
+    {
+        for (int i = 0; i < tentacleControler.Length; i++)
+            tentacleControler[i].transform.position = tentacleOriginalPos[i] + transform.position + (magnitude * Mathf.Sin(Time.time * frequency + i * 180) * tentacleControler[i].transform.forward + magnitude * Mathf.Sin(Time.time * frequency + i * 50) * tentacleControler[i].transform.right - (tentacleControler[i].transform.position - transform.position) * 0.2f) * Mathf.InverseLerp(0, maxSpeed, rb.velocity.magnitude);
     }
 
     void Die()
@@ -109,7 +128,7 @@ public class PlayerController : MonoBehaviour
 
     }
 
-    public void TakeObject(int healthChange, float moveSpeedChange, float damageChange, float attackSpeedChange, float sizeChange, Texture2D image, ObjectController.ItemType type)
+    public void TakeObject(int healthChange, float moveSpeedChange, float damageChange, float attackSpeedChange, GameObject model, ObjectController.ItemType type)
     {
         if (type == ObjectController.ItemType.Consumable)
             health += healthChange;
@@ -117,12 +136,12 @@ public class PlayerController : MonoBehaviour
         {
             maxHealth += healthChange;
             health += healthChange;
-            GameManager.instance.uiManager.CreateItemImage(image);
+            GameManager.instance.uiManager.CreateItemImage(model);
         }
         movementSpeed += moveSpeedChange;
+        maxSpeed = new Vector3(movementSpeed, 0, movementSpeed).magnitude;
         damage += damageChange;
         attackSpeed -= attackSpeedChange;
-        transform.localScale += Vector3.one * sizeChange;
         transform.position = new Vector3(transform.position.x, transform.localScale.y, transform.position.z);
         OnStatsChange?.Invoke(this, EventArgs.Empty);
     }

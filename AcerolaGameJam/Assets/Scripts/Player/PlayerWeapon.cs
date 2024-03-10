@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using SplineMesh;
+using System.Linq;
 
 public static class Bezier
 {
@@ -20,14 +21,14 @@ public static class Bezier
 public class PlayerWeapon : MonoBehaviour
 {
     [Header("Variables")]
-    [SerializeField] Transform weaponModel;
+    [SerializeField] Transform weaponEndPoint;
     public Transform weaponController;
     [SerializeField] Transform[] whipPoints;
     [SerializeField] Spline whipSpline;
     [SerializeField] LayerMask wallLayers;
     PlayerController player;
-    List<Vector3> newPoints = new();
-    List<Vector3> finalPoints = new();
+    readonly List<Vector3> newPoints = new();
+    readonly List<Vector3> finalPoints = new();
     float currentDis, slidingRequired, requiredDis;
     [HideInInspector] public bool performingAttack;
     [HideInInspector] public bool canDamage;
@@ -82,16 +83,16 @@ public class PlayerWeapon : MonoBehaviour
     void GetNewPoints()
     {        
         newPoints.Clear();
-        Vector3 firstPoint = whipPoints[0].position;
-        newPoints.Add(firstPoint);
+        Vector3 firstPoint = whipPoints[0].position - player.transform.position;
         Vector3 secondPoint = firstPoint + curveSizeMultiplier * whipPoints[0].forward;
-        secondPoint += magnitude * Mathf.Cos(Time.time * frequency) * transform.right + magnitude * Mathf.Sin(Time.time * frequency) * transform.up;
-        secondPoint = GetDistance(firstPoint, secondPoint);
-        newPoints.Add(secondPoint);
-        Vector3 finalPoint = GetDistance(whipPoints[0].position, whipPoints[1].position);
+        Vector3 finalPoint = GetDistance(whipPoints[0].position - player.transform.position, whipPoints[1].position - player.transform.position);
         Vector3 thirdPoint = finalPoint - curveSizeMultiplier * whipPoints[1].forward;
-        thirdPoint += magnitude * Mathf.Sin(Time.time * frequency) * Vector3.right + magnitude * Mathf.Cos(Time.time * frequency) * Vector3.up;
+        secondPoint += (magnitude * Mathf.Cos(Time.time * frequency) * transform.right + magnitude * Mathf.Sin(Time.time * frequency) * transform.up) * Mathf.InverseLerp(0, player.Range, Vector3.Distance(firstPoint, finalPoint));
+        thirdPoint += (magnitude * Mathf.Sin(Time.time * frequency) * transform.right + magnitude * Mathf.Cos(Time.time * frequency) * transform.up) * Mathf.InverseLerp(0, player.Range, Vector3.Distance(firstPoint, finalPoint));
+        secondPoint = GetDistance(firstPoint, secondPoint);
         thirdPoint = GetDistance(finalPoint, thirdPoint);
+        newPoints.Add(firstPoint);
+        newPoints.Add(secondPoint);
         newPoints.Add(thirdPoint);
         newPoints.Add(finalPoint);
         SubdividePoints();
@@ -112,16 +113,16 @@ public class PlayerWeapon : MonoBehaviour
             Vector3 point = Bezier.CubicBezierCurve(newPoints[0], newPoints[1], newPoints[2], newPoints[3], i);
             finalPoints.Add(point);
         }
-        finalPoints[0] = whipPoints[0].position;
-        finalPoints[^1] = newPoints[^1];
-        UpdateChainRenderer();
+        finalPoints[0] = newPoints.First();
+        finalPoints[^1] = newPoints.Last();
+        UpdateSpline();
     }
 
-    void UpdateChainRenderer()
+    void UpdateSpline()
     {
-        weaponModel.position = newPoints[^1];
+        weaponEndPoint.position = newPoints.Last();
         for (int i = 0; i < finalPoints.Count; i++)
-            whipSpline.nodes[i].Position = finalPoints[i] /** 3.333f*/;
+            whipSpline.nodes[i].Position = Quaternion.LookRotation(new Vector3(-player.LookDirection.x, 0, player.LookDirection.z)) * finalPoints[i];
     }
 
     void OnDrawGizmos()
