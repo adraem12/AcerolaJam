@@ -87,7 +87,6 @@ public class RoomController : MonoBehaviour
 
     IEnumerator SpawnItemRoom()
     {
-        spawnedExtraRooms = true;
         yield return new WaitForSeconds(0.15f);
         List<RoomScript> roomListByDistance = new(loadedRooms);
         roomListByDistance.RemoveAt(0);
@@ -97,6 +96,7 @@ public class RoomController : MonoBehaviour
         Destroy(itemRoom.gameObject);
         loadedRooms.Remove(loadedRooms.Single(r => r.x == tempRoom.x && r.z == tempRoom.y));
         LoadRoom("Item", tempRoom.x, tempRoom.y);
+        spawnedExtraRooms = true;
     }
 
     public void LoadRoom(string name, int x, int z)
@@ -147,6 +147,7 @@ public class RoomController : MonoBehaviour
     {
         CameraController.instance.currentRoom = room;
         currentRoom = room;
+        GameUIManager.instance.ActivateTileMap(currentRoom);
         StartCoroutine(RoomCoroutine());
     }
 

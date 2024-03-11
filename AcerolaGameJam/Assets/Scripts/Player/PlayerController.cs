@@ -140,7 +140,7 @@ public class PlayerController : MonoBehaviour
 
     void Die()
     {
-
+        SceneHandler.instance.OpenMenuScene();
     }
 
     public void TakeObject(int healthChange, float moveSpeedChange, float damageChange, float attackSpeedChange, GameObject model, ObjectController.ItemType type)

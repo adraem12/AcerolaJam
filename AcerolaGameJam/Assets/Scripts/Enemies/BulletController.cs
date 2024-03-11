@@ -18,7 +18,10 @@ public class BulletController : MonoBehaviour
         currentPosition = transform.position;
         transform.position = Vector3.MoveTowards(transform.position, playerPosition, 4f * Time.deltaTime);
         if (currentPosition == lastPosition)
+        {
+            GameManager.instance.StartCoroutine(GameManager.instance.CreateExplosion(transform.position));
             Destroy(gameObject);
+        }
         lastPosition = currentPosition;
     }
 
@@ -39,6 +42,7 @@ public class BulletController : MonoBehaviour
         if (other.CompareTag("Player"))
         {
             other.GetComponent<PlayerController>().GetDamage(1);
+            GameManager.instance.StartCoroutine(GameManager.instance.CreateExplosion(transform.position));
             Destroy(gameObject);
         }
     }
