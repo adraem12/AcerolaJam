@@ -28,10 +28,11 @@ public class EnemyController : MonoBehaviour
     public float speed;
     public float attackCoolDown;
     bool chooseDir = false;
-    public bool notInRoom = true;
+    [HideInInspector] public bool notInRoom = true;
     [HideInInspector] public bool coolingDown = false;
     Vector3 randomDir;
     public GameObject bulletPrefab;
+    bool invencible = false;
 
     void Start()
     {
@@ -113,7 +114,7 @@ public class EnemyController : MonoBehaviour
                 case EnemyType.Melee:
                     break;
                 case EnemyType.Ranged:
-                    GameObject bullet = Instantiate(bulletPrefab, transform.position + transform.forward * 1.1f, Quaternion.identity);
+                    GameObject bullet = Instantiate(bulletPrefab, transform.position + transform.up * 0.25f + transform.forward * 1.1f, Quaternion.identity);
                     bullet.GetComponent<BulletController>().SetBullet(player.transform);
                     StartCoroutine(CoolDown());
                     break;
@@ -137,15 +138,32 @@ public class EnemyController : MonoBehaviour
 
     public void TakeDamage(float damage)
     {
-        health -= damage;
-        Debug.Log(health);
-        if (health <= 0)
-            currentState = EnemyState.Die;
+        if (!invencible)
+        {
+            invencible = true;
+            StartCoroutine(DamageBlink());
+            health -= damage;
+            if (health <= 0)
+                currentState = EnemyState.Die;
+        }
+    }
+
+    IEnumerator DamageBlink()
+    {
+        Material mat = GetComponentInChildren<MeshRenderer>().material;
+        mat.SetFloat("_LightingCutoff", -1);
+        yield return new WaitForSeconds(0.1f);
+        mat.SetFloat("_LightingCutoff", 0.7f);
+        yield return new WaitForSeconds(player.AttackSpeed / 2f);
+        invencible = false;
     }
 
     void Die()
     {
         RoomController.instance.StartCoroutine(RoomController.instance.RoomCoroutine());
+        //GameManager.instance.playerStats.enemiesKilled++;
+        //GameManager.instance.SerializeJson();
+        GameManager.instance.StartCoroutine(GameManager.instance.CreateExplosion(transform.position));
         Destroy(gameObject);
     }
 }

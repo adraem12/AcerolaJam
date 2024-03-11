@@ -9,8 +9,13 @@ public class DoorScript : MonoBehaviour
     }
     public DoorType type;
     public GameObject doorObject;
-    public GameObject[] wallObjects;
-    float doorOffset = 3f;
+    float doorOffset = 5f;
+    Animator animator;
+
+    private void Start()
+    {
+        animator = GetComponentInChildren<Animator>();
+    }
 
     private void OnTriggerEnter(Collider other)
     {
@@ -36,11 +41,13 @@ public class DoorScript : MonoBehaviour
 
     public void OpenDoor()
     {
+        animator.SetBool("openDoor", true);
         doorObject.GetComponent<Collider>().isTrigger = true;
     }
 
     public void CloseDoor()
     {
+        animator.SetBool("openDoor", false);
         doorObject.GetComponent<Collider>().isTrigger = false;
     }
 }

@@ -30,6 +30,7 @@ public class BulletController : MonoBehaviour
     IEnumerator DeathDelay()
     {
         yield return new WaitForSeconds(lifeTime);
+        GameManager.instance.StartCoroutine(GameManager.instance.CreateExplosion(transform.position));
         Destroy(gameObject);
     }
 

@@ -31,13 +31,11 @@ public class PlayerWeapon : MonoBehaviour
     readonly List<Vector3> finalPoints = new();
     float currentDis, slidingRequired, requiredDis;
     [HideInInspector] public bool performingAttack;
-    [HideInInspector] public bool canDamage;
     [Header("Adjustments")]
     [SerializeField] float curveSizeMultiplier = 1;
     [Range(0, 2)][SerializeField] float rayDistance = 1;
     [SerializeField] float frequency = 1;
     [SerializeField] float magnitude = 1;
-
 
     private void Start()
     {
@@ -57,7 +55,7 @@ public class PlayerWeapon : MonoBehaviour
         Debug.DrawLine(startPoint, tipPoint, Color.blue);
         requiredDis = (tipPoint - startPoint).magnitude;
         if(performingAttack)
-            CheckEnemies(startPoint, tipPoint);
+            CheckEnemies(startPoint, whipPoints[1].position);
         if (Physics.Linecast(startPoint, tipPoint, out RaycastHit hit, wallLayers))
         {
             Vector3 disModifier = Bezier.LinearBezierCurve(startPoint, hit.point, 1);
@@ -72,12 +70,14 @@ public class PlayerWeapon : MonoBehaviour
 
     private void CheckEnemies(Vector3 startPoint, Vector3 tipPoint)
     {
-        requiredDis = (tipPoint - startPoint).magnitude;
-        if (Physics.Linecast(startPoint, tipPoint, out RaycastHit hit) && hit.collider.CompareTag("Enemy") && canDamage)
+        Debug.DrawLine(startPoint, tipPoint, Color.red);
+        if (Physics.Linecast(startPoint, tipPoint, out RaycastHit hit) && hit.collider.CompareTag("Bullet"))
         {
-            hit.collider.GetComponent<EnemyController>().TakeDamage(player.Damage);
-            canDamage = false;
+            GameManager.instance.StartCoroutine(GameManager.instance.CreateExplosion(hit.collider.gameObject.transform.position));
+            Destroy(hit.collider.gameObject);
         }
+        else if (Physics.Linecast(startPoint, tipPoint, out hit) && hit.collider.CompareTag("Enemy"))
+            hit.collider.GetComponent<EnemyController>().TakeDamage(player.Damage);
     }
 
     void GetNewPoints()

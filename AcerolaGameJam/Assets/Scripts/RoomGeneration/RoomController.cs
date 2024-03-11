@@ -2,6 +2,8 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using static Cinemachine.DocumentationSortingAttribute;
+using static UnityEditor.Recorder.OutputPath;
 
 public class RoomInfo
 {
@@ -50,6 +52,7 @@ public class RoomController : MonoBehaviour
                     room.RemoveUnconnectedDoors();
                 StartCoroutine(RoomCoroutine());
                 updatedRooms = true;
+                GameUIManager.instance.DrawMap(loadedRooms);
             }
             return;
         }
@@ -149,14 +152,14 @@ public class RoomController : MonoBehaviour
 
     public IEnumerator RoomCoroutine()
     {
-        yield return new WaitForSeconds(0.3f);
+        yield return new WaitForSeconds(0.5f);
         UpdateRooms();
     }
 
     void UpdateRooms()
     {
         foreach (RoomScript room in loadedRooms)
-            if (currentRoom != room)
+            if (room != currentRoom)
             {
                 EnemyController[] enemies = room.GetComponentsInChildren<EnemyController>();
                 if (enemies != null)

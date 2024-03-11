@@ -2,6 +2,9 @@ using System.IO;
 using UnityEngine;
 using Newtonsoft.Json;
 using System;
+using System.Security.Cryptography;
+using System.Text;
+using UnityEngine.InputSystem;
 
 public class JsonDataService : IDataService
 {
@@ -25,6 +28,7 @@ public class JsonDataService : IDataService
             return false;
         }
     }
+
     public T LoadData<T>(string relativePath)
     {
         string path = Application.persistentDataPath + relativePath;

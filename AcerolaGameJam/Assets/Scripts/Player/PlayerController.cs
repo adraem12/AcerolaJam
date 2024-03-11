@@ -4,6 +4,7 @@ using UnityEngine.InputSystem;
 using DG.Tweening;
 using System.Linq;
 using UnityEngine.Rendering;
+using System.Collections;
 
 public class PlayerController : MonoBehaviour
 {
@@ -39,6 +40,7 @@ public class PlayerController : MonoBehaviour
     [SerializeField] float frequency = 1;
     [SerializeField] float magnitude = 1;
     float maxSpeed;
+    bool invencible = false;
 
     void Start()
     {
@@ -91,10 +93,15 @@ public class PlayerController : MonoBehaviour
 
     public void GetDamage(int damage)
     {
-        health -= damage;
-        OnStatsChange?.Invoke(this, EventArgs.Empty);
-        if (health <= 0)
-            Die();
+        if (!invencible)
+        {
+            invencible = true;
+            StartCoroutine(DamageBlink());
+            health -= damage;
+            OnStatsChange?.Invoke(this, EventArgs.Empty);
+            if (health <= 0)
+                Die();
+        }
     }
 
     public void GetHeal(int heal)
@@ -106,7 +113,6 @@ public class PlayerController : MonoBehaviour
     void Attack()
     {
         playerWeapon.performingAttack = true;
-        playerWeapon.canDamage = true;
         float attackSpeed1 = attackSpeed * 0.9f * 0.15f;
         float attackSpeed2 = attackSpeed * 0.9f * 0.85f;
         weaponController.DOLocalMove(Vector3.forward * range, attackSpeed1).SetEase(Ease.InOutQuint).OnComplete(() => 
@@ -115,6 +121,15 @@ public class PlayerController : MonoBehaviour
             playerWeapon.performingAttack = false);
         });
         cooldown.StartCooldown();
+    }
+
+    IEnumerator DamageBlink()
+    {  
+        Material mat = GetComponentInChildren<MeshRenderer>().material;
+        mat.SetFloat("_LightingCutoff", -1);
+        yield return new WaitForSeconds(0.5f);
+        invencible = false;
+        mat.SetFloat("_LightingCutoff", 0.7f);
     }
 
     void MoveTentacles()

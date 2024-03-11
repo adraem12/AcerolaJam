@@ -1,16 +1,24 @@
 using System;
+using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
 public class GameUIManager : MonoBehaviour
 {
+    public static GameUIManager instance;
     public TextMeshProUGUI healthText;
     public TextMeshProUGUI damageText;
     public TextMeshProUGUI attackSpeedText;
     public TextMeshProUGUI rangeText;
     public TextMeshProUGUI moveSpeedText;
     public RectTransform itemsParent;
+    public RectTransform mapParent;
+
+    private void Awake()
+    {
+        instance = this;
+    }
 
     void Start()
     {
@@ -32,5 +40,34 @@ public class GameUIManager : MonoBehaviour
         RectTransform item = Instantiate(model, itemsParent.transform).AddComponent<RectTransform>();
         item.localScale = Vector3.one * 50;
         item.gameObject.layer = LayerMask.NameToLayer("UI");
+    }
+
+    public void DrawMap(List<RoomScript> rooms)
+    {
+        foreach (RoomScript room in rooms)
+        {
+            GameObject mapTile = Instantiate(new GameObject(), mapParent);
+            RawImage roomImage = mapTile.AddComponent<RawImage>();
+            roomImage.rectTransform.sizeDelta = new Vector2(30, 30);
+            mapTile.GetComponent<RectTransform>().SetLocalPositionAndRotation(new Vector3(room.x * roomImage.rectTransform.sizeDelta.x, room.z * roomImage.rectTransform.sizeDelta.y, 0), Quaternion.identity);
+            roomImage.color = Color.red;
+        }
+        /*
+        string TileName = "MapTile";
+        if (R.RoomNumber == 1) TileName = "BossRoomTile";
+        if (R.RoomNumber == 2) TileName = "ShopRoomTile";
+        if (R.RoomNumber == 3) TileName = "ItemRoomTile";
+        GameObject MapTile = new GameObject(TileName);
+        Image RoomImage = MapTile.AddComponent<Image>();
+        RoomImage.sprite = R.RoomSprite;
+        R.RoomImage = RoomImage;
+        RectTransform rectTransform = RoomImage.GetComponent<RectTransform>();
+        rectTransform.sizeDelta = new Vector2(Level.Height, Level.Width) * Level.IconScale;
+        rectTransform.position = R.Location * (Level.IconScale * Level.Height * Level.Scale + (Level.padding * Level.Height * Level.Scale));
+        RoomImage.transform.SetParent(transform, false);
+
+        Level.Rooms.Add(R);
+        Debug.Log("Drawing Room:" + R.RoomNumber + " at location:" + R.Location);
+        */
     }
 }

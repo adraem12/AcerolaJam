@@ -36,8 +36,9 @@ public class RoomScript : MonoBehaviour
     public IEnumerator Init()
     {
         gridController = GetComponentInChildren<GridController>();
-        yield return new WaitForSeconds(0.2f);
+        yield return new WaitForSeconds(0.1f);
         gridController.GenerateGrid();
+        yield return new WaitForSeconds(0.1f);
         SpawnEnemies();
     }
 
@@ -58,35 +59,19 @@ public class RoomScript : MonoBehaviour
             {
                 case DoorScript.DoorType.top:
                     if (!GetCloseRoom(0, 1))
-                    {
-                        door.doorObject.SetActive(false);
-                        foreach (GameObject wallObject in door.wallObjects)
-                            wallObject.SetActive(true);
-                    }
+                        door.gameObject.SetActive(false);
                     break;
                 case DoorScript.DoorType.right:
                     if (!GetCloseRoom(1, 0))
-                    {
-                        door.doorObject.SetActive(false);
-                        foreach (GameObject wallObject in door.wallObjects)
-                            wallObject.SetActive(true);
-                    }
+                        door.gameObject.SetActive(false);
                     break;
                 case DoorScript.DoorType.down:
                     if (!GetCloseRoom(0, -1))
-                    {
-                        door.doorObject.SetActive(false);
-                        foreach (GameObject wallObject in door.wallObjects)
-                            wallObject.SetActive(true);
-                    }
+                        door.gameObject.SetActive(false);
                     break;
                 case DoorScript.DoorType.left:
                     if (!GetCloseRoom(-1, 0))
-                    {
-                        door.doorObject.SetActive(false);
-                        foreach (GameObject wallObject in door.wallObjects)
-                            wallObject.SetActive(true);
-                    }
+                        door.gameObject.SetActive(false);
                     break;
             }
         }
@@ -116,7 +101,7 @@ public class RoomScript : MonoBehaviour
             {
                 Vector3 currentPoint = gridController.availablePoints[Random.Range(0, gridController.availablePoints.Count - 1)];
                 GameObject newEnemy = Instantiate(enemy.enemyPrefab, GetRoomCorner() + currentPoint, Quaternion.identity, transform);
-                newEnemy.transform.position = new Vector3(newEnemy.transform.position.x, 1, newEnemy.transform.position.z);
+                newEnemy.transform.position = new Vector3(newEnemy.transform.position.x, 0, newEnemy.transform.position.z);
                 gridController.availablePoints.Remove(currentPoint);
             }
     }
