@@ -1,11 +1,12 @@
+using DG.Tweening;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using TMPro;
-using UnityEditor;
+using Unity.Mathematics;
 using UnityEngine;
 using UnityEngine.UI;
-using static UnityEditor.Recorder.OutputPath;
 
 public class GameUIManager : MonoBehaviour
 {
@@ -46,8 +47,10 @@ public class GameUIManager : MonoBehaviour
     public void CreateItemImage(GameObject model)
     {
         RectTransform item = Instantiate(model, itemsParent.transform).AddComponent<RectTransform>();
-        item.localScale = Vector3.one * 50;
-        item.gameObject.layer = LayerMask.NameToLayer("UI");
+        item.localScale = Vector3.one * 100;
+        item.rotation = Quaternion.Euler(0 , UnityEngine.Random.Range(0, 180), 0);
+        item.GetComponentInChildren<SkinnedMeshRenderer>().gameObject.layer = LayerMask.NameToLayer("UI");
+        item.gameObject.GetComponent<SphereCollider>().enabled = false;
     }
 
     public void DrawMap(List<RoomScript> rooms)
@@ -98,6 +101,35 @@ public class GameUIManager : MonoBehaviour
             if (!currentMapTile.activeInHierarchy)
                 currentMapTile.SetActive(true);
             playerPosition.GetComponent<RectTransform>().SetLocalPositionAndRotation(new Vector3(room.x * playerPosition.GetComponent<RawImage>().rectTransform.sizeDelta.x + mapWidthOffset, room.z * playerPosition.GetComponent<RawImage>().rectTransform.sizeDelta.y + mapHeightOffset, 0), Quaternion.identity);
+        }
+    }
+
+    public IEnumerator UpdateColorText(string stat, Color color)
+    {
+        TextMeshProUGUI currentText = null;
+        switch (stat)
+        {
+            case "Health":
+                currentText = healthText;
+                break;
+            case "Damage":
+                currentText = damageText;
+                break;
+            case "AttackSpeed":
+                currentText = attackSpeedText;
+                break;
+            case "Range":
+                currentText = rangeText;
+                break;
+            case "MoveSpeed":
+                currentText = moveSpeedText;
+                break;
+        }
+        if (currentText != null)
+        {
+            currentText.color = color;
+            yield return new WaitForSeconds(0.25f);
+            currentText.DOColor(Color.white, 0.5f);
         }
     }
 }

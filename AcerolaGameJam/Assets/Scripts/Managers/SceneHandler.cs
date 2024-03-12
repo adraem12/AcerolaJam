@@ -29,14 +29,16 @@ public class SceneHandler : MonoBehaviour
     {
         fader.gameObject.SetActive(true);
         fader.transform.DOScale(Vector3.zero, 0f);
-        fader.transform.DOScale(new Vector3(1, 1, 1), 0.5f).SetEase(Ease.InOutQuad).OnComplete(() => { SceneManager.LoadSceneAsync(0, LoadSceneMode.Single); });
+        fader.transform.DOScale(new Vector3(1, 1, 1), 0.5f).SetEase(Ease.InOutQuad).OnComplete(() => { SceneManager.LoadScene(0, LoadSceneMode.Single); });
     }
 
     public void OpenGameScene()
     {
+        GameManager.instance.playerStats.runsStarted++;
+        GameManager.instance.SerializeJson();
         fader.gameObject.SetActive(true);
         fader.transform.DOScale(Vector3.zero, 0f);
-        fader.transform.DOScale(new Vector3(1, 1, 1), 0.5f).SetEase(Ease.InOutQuad).OnComplete(() => { SceneManager.LoadSceneAsync(1, LoadSceneMode.Single); });
+        fader.transform.DOScale(new Vector3(1, 1, 1), 0.5f).SetEase(Ease.InOutQuad).OnComplete(() => { SceneManager.LoadScene(1, LoadSceneMode.Single); });
     }
 
     IEnumerator RetardLoadScene()

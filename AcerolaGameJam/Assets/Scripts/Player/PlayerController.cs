@@ -41,6 +41,7 @@ public class PlayerController : MonoBehaviour
     [SerializeField] float magnitude = 1;
     float maxSpeed;
     bool invencible = false;
+    bool dead = false;
 
     void Start()
     {
@@ -81,6 +82,8 @@ public class PlayerController : MonoBehaviour
 
     private void Update()
     {
+        if (GameManager.instance.controls.PlayMap.EndGame.ReadValue<float>() > 0.1f && !dead)
+            Die();
         rb.velocity = new Vector3(moveDirection.x * movementSpeed, 0, moveDirection.z * movementSpeed);
         Quaternion rot = Quaternion.Slerp(transform.rotation, Quaternion.LookRotation(lookDirection), Time.deltaTime * lookSpeed);
         rot.x = 0;
@@ -98,6 +101,7 @@ public class PlayerController : MonoBehaviour
             invencible = true;
             StartCoroutine(DamageBlink());
             health -= damage;
+            GameUIManager.instance.StartCoroutine(GameUIManager.instance.UpdateColorText("Health", Color.red));
             OnStatsChange?.Invoke(this, EventArgs.Empty);
             if (health <= 0)
                 Die();
@@ -107,6 +111,7 @@ public class PlayerController : MonoBehaviour
     public void GetHeal(int heal)
     {
         health = Mathf.Min(maxHealth, health + heal);
+        GameUIManager.instance.StartCoroutine(GameUIManager.instance.UpdateColorText("Health", Color.green));
         OnStatsChange?.Invoke(this, EventArgs.Empty);
     }
 
@@ -140,10 +145,13 @@ public class PlayerController : MonoBehaviour
 
     void Die()
     {
+        dead = true;
+        GameManager.instance.playerStats.deaths++;
+        GameManager.instance.SerializeJson();
         SceneHandler.instance.OpenMenuScene();
     }
 
-    public void TakeObject(int healthChange, float moveSpeedChange, float damageChange, float attackSpeedChange, GameObject model, ObjectController.ItemType type)
+    public void TakeObject(int healthChange, float damageChange, float attackSpeedChange, float rangeChange, float moveSpeedChange, GameObject model, ObjectController.ItemType type)
     {
         if (type == ObjectController.ItemType.Consumable)
             health += healthChange;
@@ -153,11 +161,31 @@ public class PlayerController : MonoBehaviour
             health += healthChange;
             GameManager.instance.uiManager.CreateItemImage(model);
         }
-        movementSpeed += moveSpeedChange;
-        maxSpeed = new Vector3(movementSpeed, 0, movementSpeed).magnitude;
         damage += damageChange;
         attackSpeed -= attackSpeedChange;
-        transform.position = new Vector3(transform.position.x, transform.localScale.y, transform.position.z);
+        range += rangeChange;
+        movementSpeed += moveSpeedChange;
+        maxSpeed = new Vector3(movementSpeed, 0, movementSpeed).magnitude;
+        if (healthChange > 0)
+            GameUIManager.instance.StartCoroutine(GameUIManager.instance.UpdateColorText("Health", Color.green));
+        else if (healthChange < 0)
+            GameUIManager.instance.StartCoroutine(GameUIManager.instance.UpdateColorText("Health", Color.red));
+        if (damageChange > 0)
+            GameUIManager.instance.StartCoroutine(GameUIManager.instance.UpdateColorText("Damge", Color.green));
+        else if (damageChange < 0)
+            GameUIManager.instance.StartCoroutine(GameUIManager.instance.UpdateColorText("Damge", Color.red));
+        if (attackSpeedChange > 0)
+            GameUIManager.instance.StartCoroutine(GameUIManager.instance.UpdateColorText("AttackSpeed", Color.green));
+        else if (attackSpeedChange < 0)
+            GameUIManager.instance.StartCoroutine(GameUIManager.instance.UpdateColorText("AttackSpeed", Color.red));
+        if (rangeChange > 0)
+            GameUIManager.instance.StartCoroutine(GameUIManager.instance.UpdateColorText("Range", Color.green));
+        else if (rangeChange < 0)
+            GameUIManager.instance.StartCoroutine(GameUIManager.instance.UpdateColorText("Range", Color.red));
+        if (moveSpeedChange > 0)
+            GameUIManager.instance.StartCoroutine(GameUIManager.instance.UpdateColorText("MoveSpeed", Color.green));
+        else if (moveSpeedChange < 0)
+            GameUIManager.instance.StartCoroutine(GameUIManager.instance.UpdateColorText("MoveSpeed", Color.red));
         OnStatsChange?.Invoke(this, EventArgs.Empty);
     }
 }

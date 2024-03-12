@@ -4,13 +4,13 @@ using UnityEngine;
 
 public class ObjectController : MonoBehaviour
 {
-    public string objectName;
-    public string description;
+    //public string objectName;
+    //public string description;
     public int healthChange;
-    public float moveSpeedChange;
     public float damageChange;
-    public float attackRateChange;
     public float attackSpeedChange;
+    public float rangeChange;
+    public float moveSpeedChange;
     public enum ItemType
     {
         Consumable,
@@ -22,7 +22,7 @@ public class ObjectController : MonoBehaviour
     {
         if (other.CompareTag("Player"))
         {
-            other.GetComponent<PlayerController>().TakeObject(healthChange, moveSpeedChange, damageChange, attackSpeedChange, gameObject, type);
+            other.GetComponent<PlayerController>().TakeObject(healthChange, damageChange, attackSpeedChange, rangeChange, moveSpeedChange, gameObject, type);
             Destroy(gameObject);
         }
     }

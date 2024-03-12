@@ -161,8 +161,8 @@ public class EnemyController : MonoBehaviour
     void Die()
     {
         RoomController.instance.StartCoroutine(RoomController.instance.RoomCoroutine());
-        //GameManager.instance.playerStats.enemiesKilled++;
-        //GameManager.instance.SerializeJson();
+        GameManager.instance.playerStats.enemiesKilled++;
+        GameManager.instance.SerializeJson();
         GameManager.instance.StartCoroutine(GameManager.instance.CreateExplosion(transform.position));
         Destroy(gameObject);
     }
