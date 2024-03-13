@@ -3,7 +3,7 @@ using UnityEngine;
 
 public class BulletController : MonoBehaviour
 {
-    public float lifeTime;
+    [SerializeField] float lifeTime;
     Vector3 lastPosition;
     Vector3 currentPosition;
     Vector3 playerPosition;

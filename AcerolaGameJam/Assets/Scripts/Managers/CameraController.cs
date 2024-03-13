@@ -6,7 +6,7 @@ public class CameraController : MonoBehaviour
 {
     public static CameraController instance;
     public RoomScript currentRoom;
-    public float changeRoomSpeed;
+    [SerializeField] float changeRoomSpeed;
 
     private void Awake()
     {

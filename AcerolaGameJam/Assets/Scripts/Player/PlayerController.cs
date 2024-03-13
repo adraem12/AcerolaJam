@@ -26,12 +26,11 @@ public class PlayerController : MonoBehaviour
     public float Range { get => range; set => range = value; }
     public float MovementSpeed { get => movementSpeed; set => movementSpeed = value; }
     public static event EventHandler OnStatsChange;
-    float lookSpeed = 50;
     Rigidbody rb;
     Vector3 moveDirection;
     Vector3 lookDirection = Vector3.forward;
     public Vector3 LookDirection { get => lookDirection; }
-    public PlayerWeapon playerWeapon;
+    [SerializeField] PlayerWeapon playerWeapon;
     Transform weaponController;
     bool attacking = false;
     Cooldown cooldown;
@@ -39,6 +38,9 @@ public class PlayerController : MonoBehaviour
     Vector3[] tentacleOriginalPos;
     [SerializeField] float frequency = 1;
     [SerializeField] float magnitude = 1;
+    [SerializeField] AudioSource walkAudioSource;
+    [SerializeField] AudioSource attackAudioSource;
+    [SerializeField] AudioSource hitAudioSource;
     float maxSpeed;
     bool invencible = false;
     bool dead = false;
@@ -85,7 +87,7 @@ public class PlayerController : MonoBehaviour
         if (GameManager.instance.controls.PlayMap.EndGame.ReadValue<float>() > 0.1f && !dead)
             Die();
         rb.velocity = new Vector3(moveDirection.x * movementSpeed, 0, moveDirection.z * movementSpeed);
-        Quaternion rot = Quaternion.Slerp(transform.rotation, Quaternion.LookRotation(lookDirection), Time.deltaTime * lookSpeed);
+        Quaternion rot = Quaternion.Slerp(transform.rotation, Quaternion.LookRotation(lookDirection), Time.deltaTime * 50f);
         rot.x = 0;
         rot.z = 0;
         rb.rotation = rot;
@@ -120,6 +122,7 @@ public class PlayerController : MonoBehaviour
         playerWeapon.performingAttack = true;
         float attackSpeed1 = attackSpeed * 0.9f * 0.15f;
         float attackSpeed2 = attackSpeed * 0.9f * 0.85f;
+        attackAudioSource.Play();
         weaponController.DOLocalMove(Vector3.forward * range, attackSpeed1).SetEase(Ease.InOutQuint).OnComplete(() => 
         {
             weaponController.DOLocalMove(Vector3.forward * 0.01f, attackSpeed2).SetEase(Ease.InOutCirc).OnComplete(() =>
@@ -129,7 +132,8 @@ public class PlayerController : MonoBehaviour
     }
 
     IEnumerator DamageBlink()
-    {  
+    {
+        hitAudioSource.Play();
         Material mat = GetComponentInChildren<MeshRenderer>().material;
         mat.SetFloat("_LightingCutoff", -1);
         yield return new WaitForSeconds(0.5f);
@@ -139,8 +143,10 @@ public class PlayerController : MonoBehaviour
 
     void MoveTentacles()
     {
+        float currentSpeed = Mathf.InverseLerp(0, maxSpeed, rb.velocity.magnitude);
+        walkAudioSource.volume = currentSpeed;
         for (int i = 0; i < tentacleControler.Length; i++)
-            tentacleControler[i].transform.position = tentacleOriginalPos[i] + transform.position + (magnitude * Mathf.Sin(Time.time * frequency + i * 180) * tentacleControler[i].transform.forward + magnitude * Mathf.Sin(Time.time * frequency + i * 50) * tentacleControler[i].transform.right - (tentacleControler[i].transform.position - transform.position) * 0.2f) * Mathf.InverseLerp(0, maxSpeed, rb.velocity.magnitude);
+            tentacleControler[i].transform.position = tentacleOriginalPos[i] + transform.position + (magnitude * Mathf.Sin(Time.time * frequency + i * 180) * tentacleControler[i].transform.forward + magnitude * Mathf.Sin(Time.time * frequency + i * 50) * tentacleControler[i].transform.right - (tentacleControler[i].transform.position - transform.position) * 0.2f) * currentSpeed;
     }
 
     void Die()

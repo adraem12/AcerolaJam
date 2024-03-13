@@ -19,19 +19,22 @@ public enum EnemyType
 
 public class EnemyController : MonoBehaviour
 {
-    [HideInInspector] public PlayerController player;
+    PlayerController player;
     EnemyState currentState = EnemyState.Idle;
-    public EnemyType enemyType;
-    public float health;
-    public float followRange;
-    public float attackRange;
-    public float speed;
-    public float attackCoolDown;
+    [SerializeField] EnemyType enemyType;
+    [SerializeField] float health;
+    [SerializeField] float followRange;
+    [SerializeField] float attackRange;
+    [SerializeField] float speed;
+    [SerializeField] float attackCoolDown;
     bool chooseDir = false;
-    [HideInInspector] public bool notInRoom = true;
-    [HideInInspector] public bool coolingDown = false;
+    public bool notInRoom = true;
+    bool coolingDown = false;
     Vector3 randomDir;
-    public GameObject bulletPrefab;
+    [SerializeField] GameObject bulletPrefab;
+    [SerializeField] AudioSource flyAudioSource;
+    [SerializeField] AudioSource shootAudioSource;
+    [SerializeField] AudioSource hitAudioSource;
     bool invencible = false;
 
     void Start()
@@ -58,6 +61,7 @@ public class EnemyController : MonoBehaviour
         }
         if (!notInRoom)
         {
+            flyAudioSource.enabled = true;
             if (IsPlayerInRange() && currentState != EnemyState.Die)
                 currentState = EnemyState.Follow;
             else if (!IsPlayerInRange() && currentState != EnemyState.Die)
@@ -66,7 +70,10 @@ public class EnemyController : MonoBehaviour
                 currentState = EnemyState.Attack;
         }
         else
+        {
+            flyAudioSource.enabled = false;
             currentState = EnemyState.Idle;
+        }
     }
 
     bool IsPlayerInRange()
@@ -114,6 +121,7 @@ public class EnemyController : MonoBehaviour
                 case EnemyType.Melee:
                     break;
                 case EnemyType.Ranged:
+                    shootAudioSource.Play();
                     GameObject bullet = Instantiate(bulletPrefab, transform.position + transform.up * 0.25f + transform.forward * 1.1f, Quaternion.identity);
                     bullet.GetComponent<BulletController>().SetBullet(player.transform);
                     StartCoroutine(CoolDown());
@@ -150,6 +158,7 @@ public class EnemyController : MonoBehaviour
 
     IEnumerator DamageBlink()
     {
+        hitAudioSource.Play();
         Material mat = GetComponentInChildren<MeshRenderer>().material;
         mat.SetFloat("_LightingCutoff", -1);
         yield return new WaitForSeconds(0.1f);
